@@ -1,6 +1,0 @@
-###
-	TRANFERS APP
-###
-
-** Requirements **
-

@@ -1,0 +1,52 @@
+services:
+  # Servidor de Base de Datos MySQL
+  mysql_transfers:
+    image: mysql:8.0
+    container_name: mysql_transfers
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "Ies11887010!"
+      MYSQL_DATABASE: "transfers"
+      MYSQL_USER: "transfers_user"
+      MYSQL_PASSWORD: "Ies11887010!"
+    ports:
+      - "3306:3306"
+    volumes:
+      - transfers_db_data:/var/lib/mysql
+      # Opcional: Si guardas el SQL anterior como init.sql en una carpeta ./sql
+      # - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - transfers_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pIes11887010!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Interfaz de gestión PhpMyAdmin
+  phpmyadmin_transfers:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin_transfers
+    restart: always
+    depends_on:
+      mysql_transfers:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql_transfers
+      PMA_PORT: 3306
+      PMA_USER: "root"
+      PMA_PASSWORD: "Ies11887010!"
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 300M
+    ports:
+      - "8090:80"
+    networks:
+      - transfers_network
+
+networks:
+  transfers_network:
+    driver: bridge
+
+volumes:
+  transfers_db_data:
+    driver: local
