@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"net/http"
+	"fmt"
 	"transfers/controllers"
 	"transfers/utils"
 
@@ -12,9 +12,10 @@ import (
 func SetupRouter(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
-	// Servir archivos estáticos (JS y CSS)
+	// Servir archivos estáticos (JS, CSS, Imágenes)
 	r.Static("/js", "./static/js")
 	r.Static("/css", "./static/css")
+	r.Static("/img", "./static/img")
 
 	// 1. Inicialización de controladores
 	authCtrl := &controllers.AuthController{DB: db}
@@ -32,54 +33,76 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	// ---------------------------------------------------------
 	// RUTAS PÚBLICAS
 	// ---------------------------------------------------------
-	r.GET("/", func(c *gin.Context) { c.File("./static/views/login.html") })
-	r.POST("/login", authCtrl.Login)
-	r.GET("/logout", func(c *gin.Context) {
-		utils.ClearAuthCookie(c)
-		c.Redirect(http.StatusSeeOther, "/")
+	r.GET("/", func(c *gin.Context) {
+		fmt.Println("[SERVER LOG] Sirviendo vista: login.html")
+		c.File("./static/views/login.html")
 	})
+	r.POST("/login", authCtrl.Login)
+	r.GET("/logout", authCtrl.Logout)
 
 	// ---------------------------------------------------------
-	// VISTAS DASHBOARD (Protegidas por JWT y Rol Admin)
+	// SEMÁFORO DE REDIRECCIÓN (Tras Login exitoso)
 	// ---------------------------------------------------------
-	dashboard := r.Group("/dashboard")
-	dashboard.Use(utils.JWTAuthMiddleware())
+	// El JS de login debe redirigir a /dashboard para que este decida el destino
+	r.GET("/dashboard", utils.JWTAuthMiddleware(), authCtrl.RedirectByRole)
+
+	// ---------------------------------------------------------
+	// VISTAS RAÍZ Y DASHBOARD (Protegidas por JWT)
+	// ---------------------------------------------------------
+	vistas := r.Group("/")
+	vistas.Use(utils.JWTAuthMiddleware())
 	{
-		// Redirección principal automática según rol
-		dashboard.GET("/", authCtrl.RedirectByRole)
+		// --- DASHBOARDS PRINCIPALES ---
 
-		// --- MÓDULO USUARIOS ---
-		users := dashboard.Group("/users")
+		// Admin: http://localhost:8080/admin
+		vistas.GET("/admin", func(c *gin.Context) {
+			fmt.Println("[VIEW LOG] Entregando: admin.html")
+			c.File("./static/views/admin.html")
+		})
+
+		// Drivers: http://localhost:8080/drivers
+		vistas.GET("/drivers", func(c *gin.Context) {
+			fmt.Println("[VIEW LOG] Entregando: drivers.html")
+			c.File("./static/views/drivers.html")
+		})
+
+		// Clients: http://localhost:8080/clients
+		vistas.GET("/clients", func(c *gin.Context) {
+			fmt.Println("[VIEW LOG] Entregando: client.html")
+			c.File("./static/views/client.html")
+		})
+
+		// Companies: http://localhost:8080/companies
+		vistas.GET("/companies", func(c *gin.Context) {
+			fmt.Println("[VIEW LOG] Entregando: companies.html")
+			c.File("./static/views/companies.html")
+		})
+
+		// --- MÓDULO DE USUARIOS (Soporta /dashboard/users solicitado por admin.html) ---
+
+		usersGroup := vistas.Group("/dashboard/users")
 		{
-			// Lista principal de usuarios
-			users.GET("/", func(c *gin.Context) {
-				if role, _ := c.Get("userRole"); role != "admin" {
-					c.Redirect(http.StatusSeeOther, "/dashboard/")
-					return
-				}
+			// Lista: http://localhost:8080/dashboard/users
+			usersGroup.GET("/", func(c *gin.Context) {
+				fmt.Println("[VIEW LOG] Entregando: user.html (Lista)")
 				c.File("./static/views/user.html")
 			})
 
-			// Formulario Crear/Editar/Borrar (user_crud.html)
-			users.GET("/manage", func(c *gin.Context) {
-				if role, _ := c.Get("userRole"); role != "admin" {
-					c.Redirect(http.StatusSeeOther, "/dashboard/")
-					return
-				}
+			// CRUD: http://localhost:8080/dashboard/users/manage
+			usersGroup.GET("/manage", func(c *gin.Context) {
+				fmt.Println("[VIEW LOG] Entregando: user_crud.html (Formulario)")
 				c.File("./static/views/user_crud.html")
 			})
 		}
-
-		// Aquí puedes ir añadiendo los grupos de vistas para /clients, /companies, etc.
 	}
 
 	// ---------------------------------------------------------
-	// API V1 (Endpoints JSON)
+	// API V1 (Endpoints de Datos JSON)
 	// ---------------------------------------------------------
 	api := r.Group("/api/v1")
 	api.Use(utils.JWTAuthMiddleware())
 	{
-		// Usuarios
+		// API de Usuarios
 		u := api.Group("/users")
 		{
 			u.GET("/", userCtrl.GetAll)
@@ -89,7 +112,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			u.DELETE("/:id", userCtrl.DELETE)
 		}
 
-		// Clientes
+		// API de Clientes
 		cl := api.Group("/clients")
 		{
 			cl.GET("/", clientCtrl.GetAll)
@@ -99,7 +122,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			cl.DELETE("/:id", clientCtrl.DELETE)
 		}
 
-		// Empresas
+		// API de Empresas
 		co := api.Group("/companies")
 		{
 			co.GET("/", companyCtrl.GetAll)
@@ -109,7 +132,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			co.DELETE("/:id", companyCtrl.DELETE)
 		}
 
-		// Conductores
+		// API de Conductores
 		dr := api.Group("/drivers")
 		{
 			dr.GET("/", driverCtrl.GetAll)
@@ -119,7 +142,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			dr.DELETE("/:id", driverCtrl.DELETE)
 		}
 
-		// Vehículos
+		// API de Vehículos
 		vh := api.Group("/vehicles")
 		{
 			vh.GET("/", vehicleCtrl.GetAll)
@@ -129,7 +152,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			vh.DELETE("/:id", vehicleCtrl.DELETE)
 		}
 
-		// Reservas
+		// API de Reservas
 		bk := api.Group("/bookings")
 		{
 			bk.GET("/", bookingCtrl.GetAll)
@@ -139,7 +162,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			bk.DELETE("/:id", bookingCtrl.DELETE)
 		}
 
-		// Eventos de Reservas
+		// API de Eventos
 		ev := api.Group("/events")
 		{
 			ev.GET("/", eventCtrl.GetAll)
@@ -149,7 +172,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			ev.DELETE("/:id", eventCtrl.DELETE)
 		}
 
-		// Viajes (Rides)
+		// API de Viajes (Rides)
 		rd := api.Group("/rides")
 		{
 			rd.GET("/", rideCtrl.GetAll)
@@ -159,7 +182,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			rd.DELETE("/:id", rideCtrl.DELETE)
 		}
 
-		// Pagos
+		// API de Pagos
 		py := api.Group("/payments")
 		{
 			py.GET("/", paymentCtrl.GetAll)
@@ -169,7 +192,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			py.DELETE("/:id", paymentCtrl.DELETE)
 		}
 
-		// Valoraciones
+		// API de Valoraciones
 		rt := api.Group("/ratings")
 		{
 			rt.GET("/", ratingCtrl.GetAll)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin | Transfers</title>
+    <title>TakeUs | Master Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -23,100 +23,100 @@
     </script>
     <style>
         .admin-btn {
-            @apply bg-white p-8 rounded-2xl border border-gray-100 flex flex-col items-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-brand-primary;
+            @apply bg-white p-6 rounded-2xl border border-gray-100 flex flex-col items-center gap-3 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-brand-primary;
         }
-        .admin-icon { font-size: 1.8rem; }
-        .admin-label { @apply font-black text-[10px] uppercase tracking-tighter text-gray-500; }
+        .admin-icon { font-size: 1.5rem; }
+        .admin-label { @apply font-black text-[9px] uppercase tracking-tighter text-gray-500; }
         
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #000; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-brand-light min-h-screen font-sans">
 
-    <nav class="bg-black text-white p-5 shadow-2xl sticky top-0 z-50">
+    <nav class="bg-black p-4 shadow-2xl sticky top-0 z-50 border-b-2 border-brand-primary">
         <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-brand-primary rounded flex items-center justify-center font-black text-black">A</div>
-                <h1 class="text-xl font-black tracking-tighter text-white uppercase italic">Sistema <span class="text-brand-primary">Central</span></h1>
+            
+            <div onclick="console.log('[NAV] Click en Logo'); window.location.href='/dashboard'" class="cursor-pointer flex items-center bg-brand-primary px-3 py-1.5 rounded-lg shadow-lg hover:scale-105 transition-transform">
+                <span class="text-white font-black text-lg tracking-tighter uppercase leading-none">Take</span>
+                <span class="text-black font-black text-lg tracking-tighter uppercase ml-0.5 leading-none">Us</span>
             </div>
-            <div class="flex items-center gap-6">
-                <span class="hidden md:block text-[10px] font-bold text-gray-500 tracking-widest uppercase">Admin Root Privileges</span>
-                <a href="/logout" class="text-xs font-bold border-2 border-brand-primary px-4 py-2 rounded-full text-brand-primary hover:bg-brand-primary hover:text-black transition-all">CERRAR SESIÓN</a>
+            
+            <div class="flex items-center gap-4">
+                <span class="hidden md:block text-[9px] font-black text-gray-500 tracking-[0.2em] uppercase">Admin Privileges</span>
+                <a href="/logout" onclick="console.log('[AUTH] Cerrando sesión...')" class="text-[10px] font-black border-2 border-brand-primary px-4 py-1.5 rounded-full text-brand-primary hover:bg-brand-primary hover:text-black transition-all uppercase">Cerrar Sesión</a>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto py-16 px-4">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-black text-black uppercase tracking-tighter italic">Panel de Administración</h2>
-            <p class="text-gray-400 text-xs font-bold uppercase tracking-[0.3em] mt-2">Seleccione un módulo para gestionar</p>
-            <div class="h-1 w-24 bg-brand-primary mx-auto mt-4 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+    <main class="container mx-auto py-12 px-4 max-w-3xl">
+        
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-black text-black uppercase italic tracking-tighter">Panel Maestro</h2>
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-2 italic">Gestión de Ecosistema</p>
+            <div class="h-1 w-12 bg-brand-primary mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <div class="max-w-6xl mx-auto space-y-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <button onclick="window.location.href='/dashboard/users'" class="admin-btn border-brand-primary bg-brand-accent/20">
-                    <span class="admin-icon">👥</span>
-                    <span class="admin-label text-black">Usuarios</span>
-                    <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full mt-1 font-bold">GESTIONAR</span>
-                </button>
+            <button onclick="console.log('[DASHBOARD] Abriendo Gestión de Usuarios'); window.location.href='/dashboard/users'" class="admin-btn border-brand-primary bg-brand-accent/20">
+                <span class="admin-icon">👥</span>
+                <span class="admin-label text-black">Usuarios</span>
+                <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full font-bold">ACCEDER</span>
+            </button>
 
-                <button onclick="testAPI('clients')" class="admin-btn">
-                    <span class="admin-icon">👤</span>
-                    <span class="admin-label">Clientes</span>
-                </button>
-                <button onclick="testAPI('companies')" class="admin-btn">
-                    <span class="admin-icon">🏢</span>
-                    <span class="admin-label">Empresas</span>
-                </button>
-                <button onclick="testAPI('drivers')" class="admin-btn">
-                    <span class="admin-icon">🪪</span>
-                    <span class="admin-label">Conductores</span>
-                </button>
-                <button onclick="testAPI('vehicles')" class="admin-btn">
-                    <span class="admin-icon">🚗</span>
-                    <span class="admin-label">Vehículos</span>
-                </button>
-            </div>
+            <button onclick="testAPI('clients')" class="admin-btn">
+                <span class="admin-icon">👤</span>
+                <span class="admin-label">Clientes</span>
+            </button>
 
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <button onclick="testAPI('bookings')" class="admin-btn">
-                    <span class="admin-icon">📅</span>
-                    <span class="admin-label">Reservas</span>
-                </button>
-                <button onclick="testAPI('events')" class="admin-btn">
-                    <span class="admin-icon">🔔</span>
-                    <span class="admin-label">Eventos</span>
-                </button>
-                <button onclick="testAPI('rides')" class="admin-btn">
-                    <span class="admin-icon">🛣️</span>
-                    <span class="admin-label">Trayectos</span>
-                </button>
-                <button onclick="testAPI('payments')" class="admin-btn">
-                    <span class="admin-icon">💳</span>
-                    <span class="admin-label">Pagos</span>
-                </button>
-                <button onclick="testAPI('ratings')" class="admin-btn">
-                    <span class="admin-icon">⭐</span>
-                    <span class="admin-label">Valoraciones</span>
-                </button>
-            </div>
+            <button onclick="testAPI('companies')" class="admin-btn">
+                <span class="admin-icon">🏢</span>
+                <span class="admin-label">Empresas</span>
+            </button>
+
+            <button onclick="testAPI('drivers')" class="admin-btn">
+                <span class="admin-icon">🪪</span>
+                <span class="admin-label">Choféres</span>
+            </button>
+
+            <button onclick="testAPI('vehicles')" class="admin-btn">
+                <span class="admin-icon">🚗</span>
+                <span class="admin-label">Vehículos</span>
+            </button>
+
+            <button onclick="testAPI('bookings')" class="admin-btn">
+                <span class="admin-icon">📅</span>
+                <span class="admin-label">Reservas</span>
+            </button>
+
+            <button onclick="testAPI('rides')" class="admin-btn">
+                <span class="admin-icon">🛣️</span>
+                <span class="admin-label">Viajes</span>
+            </button>
+
+            <button onclick="testAPI('payments')" class="admin-btn">
+                <span class="admin-icon">💳</span>
+                <span class="admin-label">Pagos</span>
+            </button>
         </div>
 
-        <div id="api-result" class="mt-20 max-w-6xl mx-auto hidden animate-in fade-in duration-700">
-            <div class="bg-[#0c0c0c] border border-brand-dark rounded-2xl overflow-hidden shadow-2xl">
-                <div class="bg-brand-dark px-6 py-2 flex justify-between items-center">
-                    <span class="text-[10px] font-bold text-brand-pastel uppercase tracking-widest" id="api-title">Inspección rápida</span>
-                    <button onclick="document.getElementById('api-result').classList.add('hidden')" class="text-brand-pastel hover:text-white text-xs font-bold">Cerrar Terminal</button>
+        <div id="api-result" class="mt-10 hidden">
+            <div class="bg-black border border-brand-dark rounded-xl overflow-hidden shadow-2xl">
+                <div class="bg-brand-dark px-4 py-2 flex justify-between items-center border-b border-brand-primary/20">
+                    <span class="text-[9px] font-black text-brand-primary uppercase tracking-widest italic" id="api-title">Inspección de Datos</span>
+                    <button onclick="document.getElementById('api-result').classList.add('hidden')" class="text-white hover:text-red-500 text-[10px] font-black">CERRAR</button>
                 </div>
-                <pre class="p-8 text-brand-primary text-xs leading-relaxed overflow-auto max-h-[500px] custom-scrollbar font-mono"></pre>
+                <pre class="p-6 text-brand-primary text-[10px] leading-relaxed overflow-auto max-h-[350px] custom-scrollbar font-mono"></pre>
             </div>
         </div>
     </main>
 
     <script src="/js/admin.js"></script>
+    <script>
+        // Log de inicialización
+        console.log(" [SYSTEM] Admin Panel cargado correctamente en: " + new Date().toLocaleString());
+        console.log(" [URL] Path actual: " + window.location.pathname);
+    </script>
 </body>
 </html>

@@ -1,61 +1,54 @@
-/**
- * @file user_crud.js
- * @description Lógica para gestionar un único usuario (POST/PUT/DELETE)
- */
-
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Obtener ID de la URL si existe (?id=XXX)
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
 
+    // Evitar errores de null si los elementos no existen
+    const pageTitle = document.getElementById('page-title');
+    const formSubtitle = document.getElementById('form-subtitle');
+
     if (userId) {
-        // MODO EDICIÓN
-        prepareEditMode(userId);
+        console.log("Iniciando modo edición para ID:", userId);
+        if(pageTitle) pageTitle.textContent = "EDITAR USUARIO";
+        if(formSubtitle) formSubtitle.textContent = "Actualizar datos";
+        
+        document.getElementById('pass-hint')?.classList.remove('hidden');
+        document.getElementById('btn-delete')?.classList.remove('hidden');
+        
+        loadUserData(userId);
     } else {
-        // MODO CREACIÓN
-        prepareCreateMode();
+        console.log("Iniciando modo creación");
+        if(pageTitle) pageTitle.textContent = "NUEVO USUARIO";
+        if(formSubtitle) formSubtitle.textContent = "Crear perfil";
     }
 
-    // 2. Manejar el envío del formulario
     document.getElementById('crud-form').addEventListener('submit', (e) => {
         e.preventDefault();
         saveUser(userId);
     });
 
-    // 3. Manejar eliminación
-    document.getElementById('btn-delete').addEventListener('click', () => {
-        if(confirm("¿Estás seguro de eliminar este usuario? Esta acción es irreversible.")) {
-            deleteUser(userId);
-        }
+    document.getElementById('btn-delete')?.addEventListener('click', () => {
+        if(confirm("¿Eliminar usuario?")) deleteUser(userId);
     });
 });
 
-async function prepareEditMode(id) {
-    document.getElementById('page-title').textContent = "Editar Usuario";
-    document.getElementById('form-subtitle').textContent = "Actualizar Perfil";
-    document.getElementById('pass-hint').classList.remove('hidden');
-    document.getElementById('btn-delete').classList.remove('hidden');
-    document.getElementById('userId').value = id;
-
-    // Cargar datos actuales
+async function loadUserData(id) {
     try {
         const res = await fetch(`/api/v1/users/${id}`);
-        if (res.ok) {
-            const user = await res.json();
-            document.getElementById('username').value = user.username;
-            document.getElementById('email').value = user.email;
-            document.getElementById('role').value = user.role;
-            document.getElementById('is_active').checked = user.is_active;
-        }
-    } catch (e) { console.error("Error al cargar usuario", e); }
-}
-
-function prepareCreateMode() {
-    document.getElementById('page-title').textContent = "Nuevo Usuario";
-    document.getElementById('form-subtitle').textContent = "Crear Perfil";
+        const data = await res.json();
+        console.log("Datos cargados:", data);
+        
+        document.getElementById('username').value = data.username;
+        document.getElementById('email').value = data.email;
+        document.getElementById('role').value = data.role;
+        document.getElementById('is_active').checked = data.is_active;
+    } catch (e) {
+        console.error("Error cargando usuario:", e);
+    }
 }
 
 async function saveUser(id) {
+    console.log("Enviando formulario...");
+    
     const userData = {
         username: document.getElementById('username').value,
         email: document.getElementById('email').value,
@@ -63,8 +56,8 @@ async function saveUser(id) {
         is_active: document.getElementById('is_active').checked
     };
 
-    const pass = document.getElementById('password').value;
-    if (pass) userData.password = pass;
+    const password = document.getElementById('password').value;
+    if (password) userData.password = password;
 
     const url = id ? `/api/v1/users/${id}` : '/api/v1/users';
     const method = id ? 'PUT' : 'POST';
@@ -76,19 +69,18 @@ async function saveUser(id) {
             body: JSON.stringify(userData)
         });
 
+        const result = await res.json();
+
         if (res.ok) {
-            alert("Operación exitosa");
+            console.log("Respuesta Exitosa:", result);
+            alert("✅ ¡Guardado con éxito!");
             window.location.href = "/dashboard/users";
         } else {
-            const err = await res.json();
-            alert("Error: " + err.error);
+            console.error("Respuesta Error:", result);
+            alert("❌ Error: " + (result.error || "No se pudo guardar"));
         }
-    } catch (e) { console.error(e); }
-}
-
-async function deleteUser(id) {
-    const res = await fetch(`/api/v1/users/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-        window.location.href = "/dashboard/users";
+    } catch (e) {
+        console.error("Error de red:", e);
+        alert("❌ Error crítico de conexión");
     }
 }

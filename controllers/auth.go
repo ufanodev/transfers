@@ -1,13 +1,15 @@
 /**
  * @file auth.go
- * @description Controlador de autenticación. Gestiona el inicio de sesión,
- * la creación de cookies de sesión y la redirección de vistas por rol.
+ * @description Controlador de autenticación. Gestiona el acceso y la
+ * redirección directa a rutas limpias (/admin, /drivers, /clients).
  */
 
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"transfers/models"
 	"transfers/utils"
 
@@ -19,81 +21,105 @@ type AuthController struct {
 	DB *gorm.DB
 }
 
-// Login procesa las credenciales del usuario y establece la Cookie HttpOnly
+// Login valida las credenciales y establece la cookie de sesión segura
 func (ctrl *AuthController) Login(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 
-	// 1. Validar formato de entrada JSON
+	// 1. Validar JSON entrante
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos"})
+		fmt.Println("[LOGIN] Error: Datos de entrada inválidos")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Formato de datos inválido"})
 		return
 	}
 
-	// 2. Buscar usuario en la base de datos por email
+	// 2. Buscar usuario por Email
 	var user models.User
 	if err := ctrl.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
+		fmt.Printf("[LOGIN] Fallido: Email %s no existe\n", input.Email)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales incorrectas"})
 		return
 	}
 
-	// 3. Verificar si el usuario está activo
+	// 3. Verificar estado de cuenta
 	if !user.IsActive {
+		fmt.Printf("[LOGIN] Bloqueado: Usuario %s desactivado\n", user.Username)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cuenta de usuario desactivada"})
 		return
 	}
 
-	// 4. Comparar hashes de contraseña usando la utilidad centralizada
+	// 4. Validar Password
 	if !utils.CheckPasswordHash(input.Password, user.PasswordHash) {
+		fmt.Printf("[LOGIN] Fallido: Password incorrecta para %s\n", user.Username)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales incorrectas"})
 		return
 	}
 
-	// 5. Generar la Cookie con el Token JWT (Contiene ID y Rol)
+	// 5. Generar Cookie JWT
 	cookie, err := utils.GenerateAuthCookie(user.ID, user.Role)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al generar la sesión segura"})
+		fmt.Println("[LOGIN] Error generando cookie:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno del servidor"})
 		return
 	}
 
-	// 6. Establecer la cookie en la respuesta HTTP
+	// 6. Enviar cookie al cliente
 	http.SetCookie(c.Writer, cookie)
+	fmt.Printf("[LOGIN] Éxito: %s conectado como [%s]\n", user.Username, user.Role)
 
-	// Respuesta de éxito para el JS (login.js)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Autenticación exitosa",
 		"role":    user.Role,
 	})
 }
 
-// RedirectByRole sirve el archivo HTML físico basándose en el rol del usuario.
-// Este método es llamado por la ruta /dashboard/ después de pasar el Middleware.
+/**
+ * RedirectByRole: Redirige el navegador a la URL final limpia.
+ * Se activa al acceder a /dashboard.
+ */
 func (ctrl *AuthController) RedirectByRole(c *gin.Context) {
-	// Obtenemos el rol inyectado por el Middleware utils.JWTAuthMiddleware()
 	role, exists := c.Get("userRole")
 
 	if !exists {
-		// Si no hay rol en el contexto, forzamos vuelta al login
+		fmt.Println("[ROUTING] No se encontró rol. Redirigiendo a Login.")
 		c.Redirect(http.StatusSeeOther, "/")
 		return
 	}
 
-	// Servimos el archivo HTML correspondiente desde la carpeta static/views
-	// Go lee el archivo del disco y lo envía directamente al navegador
-	switch role {
+	// Normalizar el rol para el switch
+	roleStr := strings.ToLower(role.(string))
+	fmt.Printf("[ROUTING] Usuario con rol [%s] -> Redirigiendo a su ruta raíz\n", roleStr)
+
+	// REDIRECCIONES FÍSICAS A RUTAS LIMPIAS
+	switch roleStr {
 	case "admin":
-		c.File("./static/views/admin.html")
-	case "client":
-		c.File("./static/views/clients.html")
-	case "company":
-		c.File("./static/views/companies.html")
+		fmt.Println("[ROUTING] -> http://localhost:8080/admin")
+		c.Redirect(http.StatusSeeOther, "/admin")
+
 	case "driver":
-		c.File("./static/views/drivers.html")
+		fmt.Println("[ROUTING] -> http://localhost:8080/drivers")
+		c.Redirect(http.StatusSeeOther, "/drivers")
+
+	case "client":
+		fmt.Println("[ROUTING] -> http://localhost:8080/clients")
+		c.Redirect(http.StatusSeeOther, "/clients")
+
+	case "company":
+		fmt.Println("[ROUTING] -> http://localhost:8080/companies")
+		c.Redirect(http.StatusSeeOther, "/companies")
+
 	default:
-		// Rol desconocido: limpieza de seguridad y redirección
+		fmt.Printf("[ROUTING] Rol desconocido: %s. Expulsando.\n", roleStr)
 		utils.ClearAuthCookie(c)
 		c.Redirect(http.StatusSeeOther, "/")
 	}
+}
+
+// Logout elimina la sesión y redirige al inicio
+func (ctrl *AuthController) Logout(c *gin.Context) {
+	fmt.Println("[AUTH] Logout: Limpiando sesión.")
+	utils.ClearAuthCookie(c)
+	c.Redirect(http.StatusSeeOther, "/")
 }
