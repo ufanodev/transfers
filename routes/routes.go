@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"net/http"
 	"transfers/controllers"
+	"transfers/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -10,7 +12,12 @@ import (
 func SetupRouter(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
-	// 1. Inicialización de todos los controladores
+	// Servir archivos estáticos (JS y CSS)
+	r.Static("/js", "./static/js")
+	r.Static("/css", "./static/css")
+
+	// 1. Inicialización de controladores
+	authCtrl := &controllers.AuthController{DB: db}
 	userCtrl := &controllers.UserController{DB: db}
 	clientCtrl := &controllers.ClientController{DB: db}
 	companyCtrl := &controllers.CompanyController{DB: db}
@@ -22,107 +29,154 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	paymentCtrl := &controllers.PaymentController{DB: db}
 	ratingCtrl := &controllers.RatingController{DB: db}
 
-	// 2. Definición del grupo base de la API
-	api := r.Group("/api/v1")
+	// ---------------------------------------------------------
+	// RUTAS PÚBLICAS
+	// ---------------------------------------------------------
+	r.GET("/", func(c *gin.Context) { c.File("./static/views/login.html") })
+	r.POST("/login", authCtrl.Login)
+	r.GET("/logout", func(c *gin.Context) {
+		utils.ClearAuthCookie(c)
+		c.Redirect(http.StatusSeeOther, "/")
+	})
+
+	// ---------------------------------------------------------
+	// VISTAS DASHBOARD (Protegidas por JWT y Rol Admin)
+	// ---------------------------------------------------------
+	dashboard := r.Group("/dashboard")
+	dashboard.Use(utils.JWTAuthMiddleware())
 	{
-		// Endpoints de Usuarios
-		users := api.Group("/users")
+		// Redirección principal automática según rol
+		dashboard.GET("/", authCtrl.RedirectByRole)
+
+		// --- MÓDULO USUARIOS ---
+		users := dashboard.Group("/users")
 		{
-			users.GET("/", userCtrl.GetAll)
-			users.GET("/:id", userCtrl.Get)
-			users.POST("/", userCtrl.POST)
-			users.PUT("/:id", userCtrl.PUT)
-			users.DELETE("/:id", userCtrl.DELETE)
+			// Lista principal de usuarios
+			users.GET("/", func(c *gin.Context) {
+				if role, _ := c.Get("userRole"); role != "admin" {
+					c.Redirect(http.StatusSeeOther, "/dashboard/")
+					return
+				}
+				c.File("./static/views/user.html")
+			})
+
+			// Formulario Crear/Editar/Borrar (user_crud.html)
+			users.GET("/manage", func(c *gin.Context) {
+				if role, _ := c.Get("userRole"); role != "admin" {
+					c.Redirect(http.StatusSeeOther, "/dashboard/")
+					return
+				}
+				c.File("./static/views/user_crud.html")
+			})
 		}
 
-		// Endpoints de Clientes
-		clients := api.Group("/clients")
+		// Aquí puedes ir añadiendo los grupos de vistas para /clients, /companies, etc.
+	}
+
+	// ---------------------------------------------------------
+	// API V1 (Endpoints JSON)
+	// ---------------------------------------------------------
+	api := r.Group("/api/v1")
+	api.Use(utils.JWTAuthMiddleware())
+	{
+		// Usuarios
+		u := api.Group("/users")
 		{
-			clients.GET("/", clientCtrl.GetAll)
-			clients.GET("/:id", clientCtrl.Get)
-			clients.POST("/", clientCtrl.POST)
-			clients.PUT("/:id", clientCtrl.PUT)
-			clients.DELETE("/:id", clientCtrl.DELETE)
+			u.GET("/", userCtrl.GetAll)
+			u.POST("/", userCtrl.POST)
+			u.GET("/:id", userCtrl.Get)
+			u.PUT("/:id", userCtrl.PUT)
+			u.DELETE("/:id", userCtrl.DELETE)
 		}
 
-		// Endpoints de Empresas
-		companies := api.Group("/companies")
+		// Clientes
+		cl := api.Group("/clients")
 		{
-			companies.GET("/", companyCtrl.GetAll)
-			companies.GET("/:id", companyCtrl.Get)
-			companies.POST("/", companyCtrl.POST)
-			companies.PUT("/:id", companyCtrl.PUT)
-			companies.DELETE("/:id", companyCtrl.DELETE)
+			cl.GET("/", clientCtrl.GetAll)
+			cl.POST("/", clientCtrl.POST)
+			cl.GET("/:id", clientCtrl.Get)
+			cl.PUT("/:id", clientCtrl.PUT)
+			cl.DELETE("/:id", clientCtrl.DELETE)
 		}
 
-		// Endpoints de Conductores
-		drivers := api.Group("/drivers")
+		// Empresas
+		co := api.Group("/companies")
 		{
-			drivers.GET("/", driverCtrl.GetAll)
-			drivers.GET("/:id", driverCtrl.Get)
-			drivers.POST("/", driverCtrl.POST)
-			drivers.PUT("/:id", driverCtrl.PUT)
-			drivers.DELETE("/:id", driverCtrl.DELETE)
+			co.GET("/", companyCtrl.GetAll)
+			co.POST("/", companyCtrl.POST)
+			co.GET("/:id", companyCtrl.Get)
+			co.PUT("/:id", companyCtrl.PUT)
+			co.DELETE("/:id", companyCtrl.DELETE)
 		}
 
-		// Endpoints de Vehículos
-		vehicles := api.Group("/vehicles")
+		// Conductores
+		dr := api.Group("/drivers")
 		{
-			vehicles.GET("/", vehicleCtrl.GetAll)
-			vehicles.GET("/:id", vehicleCtrl.Get)
-			vehicles.POST("/", vehicleCtrl.POST)
-			vehicles.PUT("/:id", vehicleCtrl.PUT)
-			vehicles.DELETE("/:id", vehicleCtrl.DELETE)
+			dr.GET("/", driverCtrl.GetAll)
+			dr.POST("/", driverCtrl.POST)
+			dr.GET("/:id", driverCtrl.Get)
+			dr.PUT("/:id", driverCtrl.PUT)
+			dr.DELETE("/:id", driverCtrl.DELETE)
 		}
 
-		// Endpoints de Reservas (Bookings)
-		bookings := api.Group("/bookings")
+		// Vehículos
+		vh := api.Group("/vehicles")
 		{
-			bookings.GET("/", bookingCtrl.GetAll)
-			bookings.GET("/:id", bookingCtrl.Get)
-			bookings.POST("/", bookingCtrl.POST)
-			bookings.PUT("/:id", bookingCtrl.PUT)
-			bookings.DELETE("/:id", bookingCtrl.DELETE)
+			vh.GET("/", vehicleCtrl.GetAll)
+			vh.POST("/", vehicleCtrl.POST)
+			vh.GET("/:id", vehicleCtrl.Get)
+			vh.PUT("/:id", vehicleCtrl.PUT)
+			vh.DELETE("/:id", vehicleCtrl.DELETE)
 		}
 
-		// Endpoints de Eventos de Reserva
-		events := api.Group("/events")
+		// Reservas
+		bk := api.Group("/bookings")
 		{
-			events.GET("/", eventCtrl.GetAll)
-			events.GET("/:id", eventCtrl.Get)
-			events.POST("/", eventCtrl.POST)
-			events.PUT("/:id", eventCtrl.PUT)
-			events.DELETE("/:id", eventCtrl.DELETE)
+			bk.GET("/", bookingCtrl.GetAll)
+			bk.POST("/", bookingCtrl.POST)
+			bk.GET("/:id", bookingCtrl.Get)
+			bk.PUT("/:id", bookingCtrl.PUT)
+			bk.DELETE("/:id", bookingCtrl.DELETE)
 		}
 
-		// Endpoints de Viajes (Rides)
-		rides := api.Group("/rides")
+		// Eventos de Reservas
+		ev := api.Group("/events")
 		{
-			rides.GET("/", rideCtrl.GetAll)
-			rides.GET("/:id", rideCtrl.Get)
-			rides.POST("/", rideCtrl.POST)
-			rides.PUT("/:id", rideCtrl.PUT)
-			rides.DELETE("/:id", rideCtrl.DELETE)
+			ev.GET("/", eventCtrl.GetAll)
+			ev.POST("/", eventCtrl.POST)
+			ev.GET("/:id", eventCtrl.Get)
+			ev.PUT("/:id", eventCtrl.PUT)
+			ev.DELETE("/:id", eventCtrl.DELETE)
 		}
 
-		// Endpoints de Pagos
-		payments := api.Group("/payments")
+		// Viajes (Rides)
+		rd := api.Group("/rides")
 		{
-			payments.GET("/", paymentCtrl.GetAll)
-			payments.GET("/:id", paymentCtrl.Get)
-			payments.POST("/", paymentCtrl.POST)
-			payments.PUT("/:id", paymentCtrl.PUT)
-			payments.DELETE("/:id", paymentCtrl.DELETE)
+			rd.GET("/", rideCtrl.GetAll)
+			rd.POST("/", rideCtrl.POST)
+			rd.GET("/:id", rideCtrl.Get)
+			rd.PUT("/:id", rideCtrl.PUT)
+			rd.DELETE("/:id", rideCtrl.DELETE)
 		}
 
-		// Endpoints de Valoraciones (Ratings)
-		ratings := api.Group("/ratings")
+		// Pagos
+		py := api.Group("/payments")
 		{
-			ratings.GET("/", ratingCtrl.GetAll)
-			ratings.GET("/:id", ratingCtrl.Get)
-			ratings.POST("/", ratingCtrl.POST)
-			ratings.PUT("/:id", ratingCtrl.PUT)
-			ratings.DELETE("/:id", ratingCtrl.DELETE)
+			py.GET("/", paymentCtrl.GetAll)
+			py.POST("/", paymentCtrl.POST)
+			py.GET("/:id", paymentCtrl.Get)
+			py.PUT("/:id", paymentCtrl.PUT)
+			py.DELETE("/:id", paymentCtrl.DELETE)
+		}
+
+		// Valoraciones
+		rt := api.Group("/ratings")
+		{
+			rt.GET("/", ratingCtrl.GetAll)
+			rt.POST("/", ratingCtrl.POST)
+			rt.GET("/:id", ratingCtrl.Get)
+			rt.PUT("/:id", ratingCtrl.PUT)
+			rt.DELETE("/:id", ratingCtrl.DELETE)
 		}
 	}
 

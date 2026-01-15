@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuario | Sistema Central</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#064e3b',
+                            primary: '#10b981',
+                            light: '#f8fafc',
+                            accent: '#d1fae5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .nav-model-btn { 
+            @apply bg-white text-brand-primary text-[10px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-sm hover:bg-brand-primary hover:text-black transition-all whitespace-nowrap; 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-brand-light min-h-screen font-sans">
+
+    <nav class="bg-black p-4 shadow-2xl sticky top-0 z-50 border-b border-brand-dark">
+        <div class="container mx-auto flex overflow-x-auto gap-3 justify-center no-scrollbar">
+            <button onclick="window.location.href='/dashboard/users'" class="nav-model-btn ring-2 ring-brand-primary">Users</button>
+            <button onclick="window.location.href='/dashboard/clients'" class="nav-model-btn">Clients</button>
+            <button onclick="window.location.href='/dashboard/companies'" class="nav-model-btn">Companies</button>
+            <button onclick="window.location.href='/dashboard/drivers'" class="nav-model-btn">Drivers</button>
+            <button onclick="window.location.href='/dashboard/vehicles'" class="nav-model-btn">Vehicles</button>
+            <button onclick="window.location.href='/dashboard/bookings'" class="nav-model-btn">Bookings</button>
+            <button onclick="window.location.href='/dashboard/events'" class="nav-model-btn">Events</button>
+            <button onclick="window.location.href='/dashboard/rides'" class="nav-model-btn">Rides</button>
+            <button onclick="window.location.href='/dashboard/payments'" class="nav-model-btn">Payments</button>
+            <button onclick="window.location.href='/dashboard/ratings'" class="nav-model-btn">Ratings</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto py-12 px-6">
+        <div class="max-w-2xl mx-auto mb-8 flex justify-between items-end">
+            <div>
+                <h2 id="page-title" class="text-3xl font-black text-black uppercase tracking-tighter italic">Cargando...</h2>
+                <div class="h-1 w-16 bg-brand-primary mt-2 rounded-full"></div>
+            </div>
+            <button onclick="window.location.href='/dashboard/users'" class="text-[10px] font-black text-gray-400 hover:text-black transition-colors uppercase tracking-widest">
+                Cancelar y Volver
+            </button>
+        </div>
+
+        <div class="max-w-2xl mx-auto bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100">
+            <div class="bg-black p-10 text-center">
+                <p class="text-brand-primary text-[10px] font-black uppercase tracking-[0.4em] mb-2">Editor Maestro</p>
+                <h3 id="form-subtitle" class="text-white font-black text-2xl uppercase italic tracking-tighter">Procesando Datos</h3>
+            </div>
+
+            <form id="crud-form" class="p-12 space-y-8">
+                <input type="hidden" id="userId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Nombre de Usuario</label>
+                        <input type="text" id="username" required class="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:bg-white focus:border-brand-primary outline-none font-bold transition-all shadow-inner">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Email Corporativo</label>
+                        <input type="email" id="email" required class="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:bg-white focus:border-brand-primary outline-none font-bold transition-all shadow-inner">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Contraseña</label>
+                        <input type="password" id="password" class="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:bg-white focus:border-brand-primary outline-none font-bold transition-all shadow-inner">
+                        <p id="pass-hint" class="text-[9px] text-brand-dark font-bold italic px-2 hidden">Opcional: Dejar vacío para no cambiar</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Rol de Sistema</label>
+                        <select id="role" required class="w-full bg-gray-50 border-2 border-transparent rounded-2xl px-6 py-4 focus:bg-white focus:border-brand-primary outline-none font-bold transition-all shadow-inner uppercase">
+                            <option value="admin">Admin</option>
+                            <option value="client">Client</option>
+                            <option value="driver">Driver</option>
+                            <option value="company">Company</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-5 bg-brand-light p-6 rounded-[2rem] border border-brand-accent shadow-sm">
+                    <input type="checkbox" id="is_active" checked class="w-7 h-7 accent-brand-primary cursor-pointer">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-black text-brand-dark uppercase tracking-tighter">Cuenta Habilitada</span>
+                        <span class="text-[10px] text-gray-500 font-medium">El usuario podrá iniciar sesión inmediatamente.</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-4 pt-6">
+                    <button type="submit" id="btn-save" class="w-full bg-black text-brand-primary py-6 rounded-[1.5rem] font-black uppercase text-xs tracking-[0.2em] hover:bg-brand-dark hover:text-white transition-all shadow-xl transform active:scale-95">
+                        Guardar Registro
+                    </button>
+                    
+                    <button type="button" id="btn-delete" class="hidden w-full bg-white text-red-500 border-2 border-red-50 py-4 rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                        Eliminar permanentemente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="/js/user_crud.js"></script>
+</body>
+</html>

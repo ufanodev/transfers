@@ -6,10 +6,10 @@ import (
 	"os"
 	"transfers/config"
 	"transfers/models"
-	"transfers/routes" // Asegúrate de haber creado la carpeta routes y el archivo routes.go
+	"transfers/routes"
+	"transfers/utils" // 👈 Importamos tus nuevas utilidades
 
 	"github.com/joho/godotenv"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -31,10 +31,10 @@ func main() {
 	}
 
 	// 4. Semilla de Administrador Inicial
+	// Usamos la lógica de utils para que el hash sea idéntico al del Login
 	createInitialAdmin(db)
 
 	// 5. Configurar el Router de Gin
-	// Pasamos la instancia de la DB al router para que esté disponible en los controladores
 	r := routes.SetupRouter(db)
 
 	// 6. Preparación y Arranque del Servidor
@@ -45,13 +45,11 @@ func main() {
 
 	log.Printf("🚀 [Server] Backend listo y escuchando en http://localhost:%s", port)
 
-	// r.Run es una función bloqueante que mantiene el servidor activo
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("❌ [FATAL] No se pudo iniciar el servidor: %v", err)
 	}
 }
 
-// createInitialAdmin verifica si la tabla users está vacía y crea un admin
 func createInitialAdmin(db *gorm.DB) {
 	var count int64
 	db.Model(&models.User{}).Count(&count)
@@ -59,8 +57,9 @@ func createInitialAdmin(db *gorm.DB) {
 	if count == 0 {
 		log.Println("👤 [Setup] Base de datos vacía. Creando administrador inicial...")
 
+		// 🔑 Usamos tu utilidad centralizada de hashing
 		pass := "Ies11887010!"
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+		hashedPassword, err := utils.GenerateHashPassword(pass)
 		if err != nil {
 			log.Printf("❌ [Error] Falló encriptación de pass: %v", err)
 			return
@@ -69,7 +68,7 @@ func createInitialAdmin(db *gorm.DB) {
 		admin := models.User{
 			Username:     "admin",
 			Email:        "admin@transfers.com",
-			PasswordHash: string(hashedPassword),
+			PasswordHash: hashedPassword,
 			Role:         "admin",
 			IsActive:     true,
 		}

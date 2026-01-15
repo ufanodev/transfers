@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Conductor | Transfers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#064e3b',
+                            primary: '#10b981',
+                            light: '#f0fdf4',
+                            accent: '#d1fae5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-light min-h-screen font-sans">
+
+    <nav class="bg-black text-white p-4 shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tighter">TRANSFERS <span class="text-brand-primary">DRIVER</span></h1>
+            <a href="/logout" class="bg-brand-dark hover:bg-red-900 text-[10px] font-black px-3 py-2 rounded-lg transition-colors uppercase">Desconectar</a>
+        </div>
+    </nav>
+
+    <div class="bg-white border-b border-brand-accent p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-primary"></span>
+                </span>
+                <span class="text-sm font-bold text-gray-700 uppercase">En línea</span>
+            </div>
+            <span class="text-xs font-medium text-gray-400">ID Conductor: #0042</span>
+        </div>
+    </div>
+
+    <main class="container mx-auto py-8 px-4">
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            
+            <button onclick="testAPI('rides')" class="group p-6 bg-white rounded-2xl shadow-sm border-b-4 border-brand-primary hover:bg-brand-accent transition-all flex flex-col items-center gap-3">
+                <div class="text-black group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-gray-800 text-center">Ruta Actual</span>
+            </button>
+
+            <button onclick="testAPI('bookings')" class="group p-6 bg-white rounded-2xl shadow-sm border-b-4 border-brand-primary hover:bg-brand-accent transition-all flex flex-col items-center gap-3">
+                <div class="text-black group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-gray-800 text-center">Agenda</span>
+            </button>
+
+            <button onclick="testAPI('vehicles')" class="group p-6 bg-white rounded-2xl shadow-sm border-b-4 border-brand-primary hover:bg-brand-accent transition-all flex flex-col items-center gap-3">
+                <div class="text-black group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-gray-800 text-center">Mi Vehículo</span>
+            </button>
+
+            <button onclick="testAPI('payments')" class="group p-6 bg-white rounded-2xl shadow-sm border-b-4 border-brand-primary hover:bg-brand-accent transition-all flex flex-col items-center gap-3">
+                <div class="text-black group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-gray-800 text-center">Mis Ganancias</span>
+            </button>
+
+            <button onclick="testAPI('ratings')" class="group p-6 bg-white rounded-2xl shadow-sm border-b-4 border-brand-primary hover:bg-brand-accent transition-all flex flex-col items-center gap-3">
+                <div class="text-black group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-gray-800 text-center">Puntuación</span>
+            </button>
+
+            <button onclick="testAPI('users')" class="group p-6 bg-white rounded-2xl shadow-sm border-b-4 border-brand-primary hover:bg-brand-accent transition-all flex flex-col items-center gap-3">
+                <div class="text-black group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-widest text-gray-800 text-center">Ajustes</span>
+            </button>
+
+        </div>
+
+        <div id="api-result" class="mt-8 hidden animate-fade-in">
+            <div class="bg-black text-brand-primary p-4 rounded-xl shadow-2xl overflow-x-auto">
+                <div class="flex justify-between items-center border-b border-brand-dark pb-2 mb-2">
+                    <span class="text-[9px] font-bold uppercase">Datos del Servidor</span>
+                    <button onclick="document.getElementById('api-result').classList.add('hidden')" class="text-white text-[9px] font-bold">CERRAR X</button>
+                </div>
+                <pre class="text-[10px] custom-scrollbar"></pre>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function testAPI(endpoint) {
+            const resultDiv = document.getElementById('api-result');
+            const pre = resultDiv.querySelector('pre');
+            
+            try {
+                const res = await fetch(`/api/v1/${endpoint}`);
+                if (res.status === 401) {
+                    window.location.href = "/";
+                    return;
+                }
+                const data = await res.json();
+                
+                resultDiv.classList.remove('hidden');
+                pre.textContent = "// CARGANDO: " + endpoint.toUpperCase() + "...\n" + JSON.stringify(data, null, 2);
+            } catch (err) {
+                console.error("Error:", err);
+            }
+        }
+    </script>
+</body>
+</html>

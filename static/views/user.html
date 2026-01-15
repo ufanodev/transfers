@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios | Sistema Central</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { primary: '#10b981', dark: '#064e3b', light: '#f8fafc', accent: '#d1fae5' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Nav buttons: Fondo verde, letras blancas */
+        .nav-model-btn { 
+            @apply bg-brand-primary text-white text-[10px] font-black uppercase px-4 py-2 rounded shadow-md hover:bg-brand-dark transition-all whitespace-nowrap; 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-brand-light min-h-screen font-sans">
+
+    <nav class="bg-black p-4 shadow-2xl sticky top-0 z-50 border-b border-brand-dark">
+        <div class="container mx-auto flex overflow-x-auto gap-3 justify-center no-scrollbar">
+            <button onclick="window.location.href='/dashboard/users'" class="nav-model-btn ring-2 ring-white">Users</button>
+            <button onclick="window.location.href='/dashboard/clients'" class="nav-model-btn">Clients</button>
+            <button onclick="window.location.href='/dashboard/companies'" class="nav-model-btn">Companies</button>
+            <button onclick="window.location.href='/dashboard/drivers'" class="nav-model-btn">Drivers</button>
+            <button onclick="window.location.href='/dashboard/vehicles'" class="nav-model-btn">Vehicles</button>
+            <button onclick="window.location.href='/dashboard/bookings'" class="nav-model-btn">Bookings</button>
+            <button onclick="window.location.href='/dashboard/events'" class="nav-model-btn">Events</button>
+            <button onclick="window.location.href='/dashboard/rides'" class="nav-model-btn">Rides</button>
+            <button onclick="window.location.href='/dashboard/payments'" class="nav-model-btn">Payments</button>
+            <button onclick="window.location.href='/dashboard/ratings'" class="nav-model-btn">Ratings</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto py-8 px-6">
+        <div class="flex flex-col md:row justify-between items-center mb-10 gap-6">
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportData('pdf')" class="bg-red-500 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase shadow-md hover:bg-red-600 transition">PDF REPORTE</button>
+                <button onclick="exportData('excel')" class="bg-green-600 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase shadow-md hover:bg-green-700 transition">EXCEL DATA</button>
+                <button onclick="window.location.href='/dashboard/'" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase shadow-md hover:bg-black transition">VOLVER AL PANEL</button>
+            </div>
+            
+            <button onclick="window.location.href='/dashboard/users/manage'" 
+                class="bg-black text-brand-primary px-8 py-4 rounded-2xl font-black text-xs hover:bg-brand-dark hover:text-white transition-all shadow-xl transform active:scale-95 border border-brand-primary/20">
+                + NUEVO USUARIO
+            </button>
+        </div>
+
+        <div class="bg-white shadow-2xl rounded-[2.5rem] overflow-hidden border border-gray-100">
+            <div class="p-6 bg-gray-50 border-b flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Mostrar:</span>
+                    <select id="pageSize" onchange="loadUsers()" class="bg-white border-2 border-gray-100 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:border-brand-primary transition-all shadow-sm">
+                        <option value="10">10 Filas</option>
+                        <option value="25">25 Filas</option>
+                        <option value="50">50 Filas</option>
+                        <option value="0">Ver Todos</option>
+                    </select>
+                </div>
+                <div id="pagination-info" class="text-[10px] font-black text-brand-dark bg-brand-accent px-5 py-2 rounded-full uppercase tracking-widest">
+                    Cargando registros...
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] bg-white border-b">
+                            <th class="p-6">Username</th>
+                            <th class="p-6">Email</th>
+                            <th class="p-6 text-center">Rol</th>
+                            <th class="p-6 text-center">Estado</th>
+                            <th class="p-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body" class="divide-y divide-gray-50 text-sm italic font-medium">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/user.js"></script>
+</body>
+</html>

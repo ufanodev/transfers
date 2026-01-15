@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin | Transfers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#064e3b',
+                            primary: '#10b981',
+                            light: '#f8fafc',
+                            accent: '#d1fae5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .admin-btn {
+            @apply bg-white p-8 rounded-2xl border border-gray-100 flex flex-col items-center gap-4 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-brand-primary;
+        }
+        .admin-icon { font-size: 1.8rem; }
+        .admin-label { @apply font-black text-[10px] uppercase tracking-tighter text-gray-500; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #000; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-brand-light min-h-screen font-sans">
+
+    <nav class="bg-black text-white p-5 shadow-2xl sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-brand-primary rounded flex items-center justify-center font-black text-black">A</div>
+                <h1 class="text-xl font-black tracking-tighter text-white uppercase italic">Sistema <span class="text-brand-primary">Central</span></h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <span class="hidden md:block text-[10px] font-bold text-gray-500 tracking-widest uppercase">Admin Root Privileges</span>
+                <a href="/logout" class="text-xs font-bold border-2 border-brand-primary px-4 py-2 rounded-full text-brand-primary hover:bg-brand-primary hover:text-black transition-all">CERRAR SESIÓN</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto py-16 px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-black text-black uppercase tracking-tighter italic">Panel de Administración</h2>
+            <p class="text-gray-400 text-xs font-bold uppercase tracking-[0.3em] mt-2">Seleccione un módulo para gestionar</p>
+            <div class="h-1 w-24 bg-brand-primary mx-auto mt-4 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+        </div>
+
+        <div class="max-w-6xl mx-auto space-y-8">
+            
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <button onclick="window.location.href='/dashboard/users'" class="admin-btn border-brand-primary bg-brand-accent/20">
+                    <span class="admin-icon">👥</span>
+                    <span class="admin-label text-black">Usuarios</span>
+                    <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full mt-1 font-bold">GESTIONAR</span>
+                </button>
+
+                <button onclick="testAPI('clients')" class="admin-btn">
+                    <span class="admin-icon">👤</span>
+                    <span class="admin-label">Clientes</span>
+                </button>
+                <button onclick="testAPI('companies')" class="admin-btn">
+                    <span class="admin-icon">🏢</span>
+                    <span class="admin-label">Empresas</span>
+                </button>
+                <button onclick="testAPI('drivers')" class="admin-btn">
+                    <span class="admin-icon">🪪</span>
+                    <span class="admin-label">Conductores</span>
+                </button>
+                <button onclick="testAPI('vehicles')" class="admin-btn">
+                    <span class="admin-icon">🚗</span>
+                    <span class="admin-label">Vehículos</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <button onclick="testAPI('bookings')" class="admin-btn">
+                    <span class="admin-icon">📅</span>
+                    <span class="admin-label">Reservas</span>
+                </button>
+                <button onclick="testAPI('events')" class="admin-btn">
+                    <span class="admin-icon">🔔</span>
+                    <span class="admin-label">Eventos</span>
+                </button>
+                <button onclick="testAPI('rides')" class="admin-btn">
+                    <span class="admin-icon">🛣️</span>
+                    <span class="admin-label">Trayectos</span>
+                </button>
+                <button onclick="testAPI('payments')" class="admin-btn">
+                    <span class="admin-icon">💳</span>
+                    <span class="admin-label">Pagos</span>
+                </button>
+                <button onclick="testAPI('ratings')" class="admin-btn">
+                    <span class="admin-icon">⭐</span>
+                    <span class="admin-label">Valoraciones</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="api-result" class="mt-20 max-w-6xl mx-auto hidden animate-in fade-in duration-700">
+            <div class="bg-[#0c0c0c] border border-brand-dark rounded-2xl overflow-hidden shadow-2xl">
+                <div class="bg-brand-dark px-6 py-2 flex justify-between items-center">
+                    <span class="text-[10px] font-bold text-brand-pastel uppercase tracking-widest" id="api-title">Inspección rápida</span>
+                    <button onclick="document.getElementById('api-result').classList.add('hidden')" class="text-brand-pastel hover:text-white text-xs font-bold">Cerrar Terminal</button>
+                </div>
+                <pre class="p-8 text-brand-primary text-xs leading-relaxed overflow-auto max-h-[500px] custom-scrollbar font-mono"></pre>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>
