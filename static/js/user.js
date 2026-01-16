@@ -10,6 +10,7 @@ let allUsers = [];
  * Inicialización al cargar el DOM
  */
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("%c[SYSTEM] Módulo User iniciado.", "color: #10b981; font-weight: bold;");
     loadUsers();
 });
 
@@ -19,10 +20,19 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadUsers() {
     const paginationInfo = document.getElementById('pagination-info');
     try {
+        console.log("[API] Solicitando /api/v1/users...");
         const response = await fetch('/api/v1/users');
         
         if (response.status === 401) {
             window.location.href = "/";
+            return;
+        }
+
+        // Verificar si el servidor devolvió HTML por error (redirección fallida)
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+            console.error("[FATAL] El servidor devolvió HTML en lugar de JSON.");
+            if (paginationInfo) paginationInfo.textContent = "ERROR: BUCLE DE REDIRECCIÓN";
             return;
         }
 
@@ -36,7 +46,7 @@ async function loadUsers() {
 }
 
 /**
- * Renderiza la tabla con reducción del 30% en tamaños y espacios
+ * Renderiza la tabla con normalización de campos (PascalCase a camelCase)
  */
 function renderTable() {
     const pageSizeSelect = document.getElementById('pageSize');
@@ -47,41 +57,44 @@ function renderTable() {
     // Filtrar por tamaño de página (0 es ALL)
     const displayUsers = (pageSize === 0) ? allUsers : allUsers.slice(0, pageSize);
     
-    // Actualizar el contador de registros
     if (paginationInfo) {
         paginationInfo.textContent = `REGISTROS: ${displayUsers.length} / ${allUsers.length}`;
     }
 
-    if (allUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400 uppercase text-[9px] font-black">No hay datos</td></tr>`;
+    if (!allUsers || allUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-gray-400 uppercase text-[9px] font-black italic">No hay datos encontrados</td></tr>`;
         return;
     }
 
-    // Mapeo de filas ultra-compactas
     tbody.innerHTML = displayUsers.map(u => {
-        // Asegurar que capturamos el ID correctamente (u.ID suele ser el estándar en Go)
+        // --- NORMALIZACIÓN CRÍTICA ---
+        // Esto permite que el JS lea los campos sin importar si Go los mandó como "ID" o "id"
         const userId = u.ID || u.id;
+        const username = u.Username || u.username || "Sin Nombre";
+        const email = u.Email || u.email || "Sin Email";
+        const role = u.Role || u.role || "client";
+        const isActive = (u.IsActive !== undefined) ? u.IsActive : u.is_active;
         
         return `
         <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100">
             <td class="px-3 py-1.5 overflow-hidden">
                 <div class="flex flex-col leading-none">
-                    <span class="font-black text-black uppercase text-[10px] truncate" title="${u.username}">
-                        ${u.username}
+                    <span class="font-black text-black uppercase text-[10px] truncate" title="${username}">
+                        ${username}
                     </span>
-                    <span class="text-[8px] text-gray-400 font-bold lowercase truncate" title="${u.email}">
-                        ${u.email}
+                    <span class="text-[8px] text-gray-400 font-bold lowercase truncate" title="${email}">
+                        ${email}
                     </span>
                 </div>
             </td>
             <td class="px-3 py-1.5 text-center">
-                <span class="px-1.5 py-0.5 rounded-[4px] text-[8px] font-black uppercase shadow-sm ${getRoleStyle(u.role)}">
-                    ${u.role}
+                <span class="px-1.5 py-0.5 rounded-[4px] text-[8px] font-black uppercase shadow-sm ${getRoleStyle(role)}">
+                    ${role}
                 </span>
             </td>
             <td class="px-3 py-1.5 text-center">
-                <span class="text-[8px] font-black italic ${u.is_active ? 'text-emerald-600' : 'text-red-500'}">
-                    ${u.is_active ? '● ACTIVO' : '○ INACTIVO'}
+                <span class="text-[8px] font-black italic ${isActive ? 'text-emerald-600' : 'text-red-500'}">
+                    ${isActive ? '● ACTIVO' : '○ INACTIVO'}
                 </span>
             </td>
             <td class="px-3 py-1.5 text-right">
@@ -102,35 +115,36 @@ function renderTable() {
                     </button>
                 </div>
             </td>
-        </tr>
-    `}).join('');
+        </tr>`;
+    }).join('');
 }
 
 /**
- * Estilos para badges de roles (Versión Mini)
+ * Estilos para badges de roles
  */
 function getRoleStyle(role) {
+    // Normalizar a minúsculas para la comparación
+    const r = role.toLowerCase();
     const s = {
         'admin': 'bg-black text-[#10b981] border border-[#10b981]/30',
         'company': 'bg-slate-700 text-white',
         'driver': 'bg-[#10b981] text-black',
         'client': 'bg-slate-100 text-slate-500'
     };
-    return s[role] || 'bg-gray-100 text-gray-400';
+    return s[r] || 'bg-gray-100 text-gray-400';
 }
 
 /**
- * Eliminación rápida con confirmación
+ * Eliminación rápida
  */
 async function quickDelete(id) {
-    if (!id) return;
-    if (!confirm("¿Eliminar este registro permanentemente?")) return;
+    if (!id || !confirm("¿Eliminar este registro permanentemente?")) return;
 
     try {
         const response = await fetch(`/api/v1/users/${id}`, { method: 'DELETE' });
         if (response.ok) {
             console.log(`Usuario ${id} eliminado.`);
-            loadUsers(); // Recargar la lista automáticamente
+            loadUsers(); 
         } else {
             const err = await response.json();
             alert("Error: " + (err.error || "No autorizado"));
@@ -140,9 +154,6 @@ async function quickDelete(id) {
     }
 }
 
-/**
- * Placeholder para exportación
- */
 function exportData(type) {
-    alert(`Generando Reporte ${type.toUpperCase()}...\nRegistros procesados: ${allUsers.length}`);
+    alert(`Generando Reporte ${type.toUpperCase()}...\nRegistros: ${allUsers.length}`);
 }

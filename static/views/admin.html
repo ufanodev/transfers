@@ -37,14 +37,14 @@
     <nav class="bg-black p-4 shadow-2xl sticky top-0 z-50 border-b-2 border-brand-primary">
         <div class="container mx-auto flex justify-between items-center">
             
-            <div onclick="console.log('[NAV] Click en Logo'); window.location.href='/dashboard'" class="cursor-pointer flex items-center bg-brand-primary px-3 py-1.5 rounded-lg shadow-lg hover:scale-105 transition-transform">
+            <div onclick="window.location.href='/admin'" class="cursor-pointer flex items-center bg-brand-primary px-3 py-1.5 rounded-lg shadow-lg hover:scale-105 transition-transform">
                 <span class="text-white font-black text-lg tracking-tighter uppercase leading-none">Take</span>
                 <span class="text-black font-black text-lg tracking-tighter uppercase ml-0.5 leading-none">Us</span>
             </div>
             
             <div class="flex items-center gap-4">
-                <span class="hidden md:block text-[9px] font-black text-gray-500 tracking-[0.2em] uppercase">Admin Privileges</span>
-                <a href="/logout" onclick="console.log('[AUTH] Cerrando sesión...')" class="text-[10px] font-black border-2 border-brand-primary px-4 py-1.5 rounded-full text-brand-primary hover:bg-brand-primary hover:text-black transition-all uppercase">Cerrar Sesión</a>
+                <span class="hidden md:block text-[9px] font-black text-gray-500 tracking-[0.2em] uppercase italic">Admin Privileges</span>
+                <a href="/logout" class="text-[10px] font-black border-2 border-brand-primary px-4 py-1.5 rounded-full text-brand-primary hover:bg-brand-primary hover:text-black transition-all uppercase">Cerrar Sesión</a>
             </div>
         </div>
     </nav>
@@ -53,31 +53,34 @@
         
         <div class="text-center mb-10">
             <h2 class="text-3xl font-black text-black uppercase italic tracking-tighter">Panel Maestro</h2>
-            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-2 italic">Gestión de Ecosistema</p>
+            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-2 italic">Gestión de Ecosistema de Transporte</p>
             <div class="h-1 w-12 bg-brand-primary mx-auto mt-4 rounded-full"></div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             
-            <button onclick="console.log('[DASHBOARD] Abriendo Gestión de Usuarios'); window.location.href='/dashboard/users'" class="admin-btn border-brand-primary bg-brand-accent/20">
+            <button onclick="window.location.href='/dashboard/users'" class="admin-btn border-brand-primary bg-brand-accent/20">
                 <span class="admin-icon">👥</span>
                 <span class="admin-label text-black">Usuarios</span>
-                <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full font-bold">ACCEDER</span>
+                <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full font-bold">GESTIONAR</span>
             </button>
 
-            <button onclick="testAPI('clients')" class="admin-btn">
+            <button onclick="window.location.href='/dashboard/clients'" class="admin-btn border-brand-primary bg-brand-accent/20">
                 <span class="admin-icon">👤</span>
-                <span class="admin-label">Clientes</span>
+                <span class="admin-label text-black">Clientes</span>
+                <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full font-bold">GESTIONAR</span>
             </button>
 
-            <button onclick="testAPI('companies')" class="admin-btn">
+            <button onclick="window.location.href='/companies'" class="admin-btn border-brand-primary bg-brand-accent/20">
                 <span class="admin-icon">🏢</span>
-                <span class="admin-label">Empresas</span>
+                <span class="admin-label text-black">Empresas</span>
+                <span class="text-[8px] bg-black text-white px-2 py-0.5 rounded-full font-bold">GESTIONAR</span>
             </button>
 
             <button onclick="testAPI('drivers')" class="admin-btn">
                 <span class="admin-icon">🪪</span>
                 <span class="admin-label">Choféres</span>
+                <span class="text-[7px] text-gray-400 uppercase font-bold">Inspeccionar API</span>
             </button>
 
             <button onclick="testAPI('vehicles')" class="admin-btn">
@@ -105,18 +108,50 @@
             <div class="bg-black border border-brand-dark rounded-xl overflow-hidden shadow-2xl">
                 <div class="bg-brand-dark px-4 py-2 flex justify-between items-center border-b border-brand-primary/20">
                     <span class="text-[9px] font-black text-brand-primary uppercase tracking-widest italic" id="api-title">Inspección de Datos</span>
-                    <button onclick="document.getElementById('api-result').classList.add('hidden')" class="text-white hover:text-red-500 text-[10px] font-black">CERRAR</button>
+                    <button onclick="document.getElementById('api-result').classList.add('hidden')" class="text-white hover:text-red-500 text-[10px] font-black uppercase">Cerrar</button>
                 </div>
-                <pre class="p-6 text-brand-primary text-[10px] leading-relaxed overflow-auto max-h-[350px] custom-scrollbar font-mono"></pre>
+                <pre id="api-pre" class="p-6 text-brand-primary text-[10px] leading-relaxed overflow-auto max-h-[350px] custom-scrollbar font-mono"></pre>
             </div>
         </div>
     </main>
 
-    <script src="/js/admin.js"></script>
     <script>
-        // Log de inicialización
-        console.log(" [SYSTEM] Admin Panel cargado correctamente en: " + new Date().toLocaleString());
-        console.log(" [URL] Path actual: " + window.location.pathname);
+        /**
+         * Función para testear endpoints antes de tener las vistas HTML listas
+         */
+        async function testAPI(endpoint) {
+            const resultDiv = document.getElementById('api-result');
+            const pre = document.getElementById('api-pre');
+            const title = document.getElementById('api-title');
+
+            console.log(`[SYSTEM] Consultando API: /api/v1/${endpoint}`);
+
+            try {
+                const response = await fetch(`/api/v1/${endpoint}`);
+                
+                // Si el middleware detecta sesión expirada (401)
+                if (response.status === 401) {
+                    console.warn("[AUTH] Sesión no válida. Redirigiendo...");
+                    window.location.href = "/";
+                    return;
+                }
+
+                const data = await response.json();
+                
+                resultDiv.classList.remove('hidden');
+                title.textContent = `Inspeccionando: ${endpoint.toUpperCase()}`;
+                pre.textContent = JSON.stringify(data, null, 4);
+                
+                // Desplazamiento suave hasta el inspector
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error("Error en testAPI:", error);
+                alert("Error de conexión con el endpoint: " + endpoint);
+            }
+        }
+
+        console.log(" [SYSTEM] Admin Panel Master inicializado correctamente.");
     </script>
 </body>
 </html>
