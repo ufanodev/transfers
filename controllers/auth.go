@@ -1,15 +1,10 @@
-/**
- * @file auth.go
- * @description Controlador de autenticación. Gestiona el acceso y la
- * redirección directa a rutas limpias (/admin, /drivers, /clients).
- */
-
 package controllers
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"net/http"
-	"strings"
 	"transfers/models"
 	"transfers/utils"
 
@@ -21,105 +16,89 @@ type AuthController struct {
 	DB *gorm.DB
 }
 
-// Login valida las credenciales y establece la cookie de sesión segura
+// LoginRequest define la estructura estrictamente esperada del cliente
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// Login: Valida credenciales, comprueba email/password y genera cookie JWT
 func (ctrl *AuthController) Login(c *gin.Context) {
-	var input struct {
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
+	// --- DEPURACIÓN DEL BODY ---
+	bodyBytes, _ := io.ReadAll(c.Request.Body)
+	fmt.Printf("[AUTH] 🛰️ RAW BODY: '%s'\n", string(bodyBytes))
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
-	// 1. Validar JSON entrante
+	var input LoginRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
-		fmt.Println("[LOGIN] Error: Datos de entrada inválidos")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Formato de datos inválido"})
+		fmt.Printf("[AUTH] ❌ Error de Binding JSON: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email y contraseña requeridos"})
 		return
 	}
 
-	// 2. Buscar usuario por Email
+	// 1. Buscar al usuario en la DB
 	var user models.User
-	if err := ctrl.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
-		fmt.Printf("[LOGIN] Fallido: Email %s no existe\n", input.Email)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales incorrectas"})
+	if err := ctrl.DB.Where("email = ?", input.Username).First(&user).Error; err != nil {
+		fmt.Printf("[AUTH] 🚫 Usuario no encontrado: %s\n", input.Username)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales inválidas"})
 		return
 	}
 
-	// 3. Verificar estado de cuenta
-	if !user.IsActive {
-		fmt.Printf("[LOGIN] Bloqueado: Usuario %s desactivado\n", user.Username)
-		c.JSON(http.StatusForbidden, gin.H{"error": "Cuenta de usuario desactivada"})
-		return
-	}
-
-	// 4. Validar Password
+	// 2. Verificar Password
 	if !utils.CheckPasswordHash(input.Password, user.PasswordHash) {
-		fmt.Printf("[LOGIN] Fallido: Password incorrecta para %s\n", user.Username)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales incorrectas"})
+		fmt.Printf("[AUTH] 🔑 Password incorrecta: %s\n", input.Username)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales inválidas"})
 		return
 	}
 
-	// 5. Generar Cookie JWT
+	// 3. Generar Cookie JWT
 	cookie, err := utils.GenerateAuthCookie(user.ID, user.Role)
 	if err != nil {
-		fmt.Println("[LOGIN] Error generando cookie:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno del servidor"})
+		fmt.Printf("[AUTH] ❌ Error generando Cookie: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno"})
 		return
 	}
 
-	// 6. Enviar cookie al cliente
+	// 4. Inyectar Cookie en respuesta
 	http.SetCookie(c.Writer, cookie)
-	fmt.Printf("[LOGIN] Éxito: %s conectado como [%s]\n", user.Username, user.Role)
+
+	fmt.Printf("[AUTH] ✅ LOGIN EXITOSO: %s | Rol: [%s]\n", user.Email, user.Role)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Autenticación exitosa",
+		"message": "Bienvenido",
 		"role":    user.Role,
 	})
 }
 
-/**
- * RedirectByRole: Redirige el navegador a la URL final limpia.
- * Se activa al acceder a /dashboard.
- */
+// RedirectByRole: El semáforo que actúa tras el login exitoso (Coordinado con routes.go)
 func (ctrl *AuthController) RedirectByRole(c *gin.Context) {
 	role, exists := c.Get("userRole")
-
 	if !exists {
-		fmt.Println("[ROUTING] No se encontró rol. Redirigiendo a Login.")
+		fmt.Println("[SEMÁFORO] ⚠️ Rol no encontrado, regresando al login")
 		c.Redirect(http.StatusSeeOther, "/")
 		return
 	}
 
-	// Normalizar el rol para el switch
-	roleStr := strings.ToLower(role.(string))
-	fmt.Printf("[ROUTING] Usuario con rol [%s] -> Redirigiendo a su ruta raíz\n", roleStr)
+	fmt.Printf("[SEMÁFORO] 🚦 Redirigiendo según rol: [%v]\n", role)
 
-	// REDIRECCIONES FÍSICAS A RUTAS LIMPIAS
-	switch roleStr {
+	// Redirecciones en SINGULAR para coincidir con las carpetas físicas y routes.go
+	switch role {
 	case "admin":
-		fmt.Println("[ROUTING] -> http://localhost:8080/admin")
-		c.Redirect(http.StatusSeeOther, "/admin")
-
-	case "driver":
-		fmt.Println("[ROUTING] -> http://localhost:8080/drivers")
-		c.Redirect(http.StatusSeeOther, "/drivers")
-
+		c.Redirect(http.StatusSeeOther, "/admin/")
 	case "client":
-		fmt.Println("[ROUTING] -> http://localhost:8080/clients")
-		c.Redirect(http.StatusSeeOther, "/clients")
-
+		c.Redirect(http.StatusSeeOther, "/client/")
+	case "driver":
+		c.Redirect(http.StatusSeeOther, "/driver/")
 	case "company":
-		fmt.Println("[ROUTING] -> http://localhost:8080/companies")
-		c.Redirect(http.StatusSeeOther, "/companies")
-
+		c.Redirect(http.StatusSeeOther, "/company/")
 	default:
-		fmt.Printf("[ROUTING] Rol desconocido: %s. Expulsando.\n", roleStr)
-		utils.ClearAuthCookie(c)
 		c.Redirect(http.StatusSeeOther, "/")
 	}
 }
 
-// Logout elimina la sesión y redirige al inicio
+// Logout: Invalida la cookie y saca al usuario
 func (ctrl *AuthController) Logout(c *gin.Context) {
-	fmt.Println("[AUTH] Logout: Limpiando sesión.")
-	utils.ClearAuthCookie(c)
+	c.SetCookie(utils.AuthCookieName, "", -1, "/", "", false, true)
+	fmt.Println("[AUTH] 🚪 Sesión cerrada.")
 	c.Redirect(http.StatusSeeOther, "/")
 }

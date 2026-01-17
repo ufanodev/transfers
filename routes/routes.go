@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"transfers/controllers"
 	"transfers/utils"
 
@@ -12,10 +13,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 
 	// --- CONFIGURACIÓN GLOBAL ---
-	r.RedirectTrailingSlash = false
-	r.RedirectFixedPath = false
+	r.RedirectTrailingSlash = true
+	r.RedirectFixedPath = true
 
-	// Servir archivos estáticos
+	// --- SERVIR ESTÁTICOS ---
+	// Mapeo general para que todas las subcarpetas de js, css e img sean accesibles
 	r.Static("/js", "./static/js")
 	r.Static("/css", "./static/css")
 	r.Static("/img", "./static/img")
@@ -34,57 +36,87 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	ratingCtrl := &controllers.RatingController{DB: db}
 
 	// ---------------------------------------------------------
-	// RUTAS PÚBLICAS
+	// RUTAS PÚBLICAS (Login / Logout)
 	// ---------------------------------------------------------
 	r.GET("/", func(c *gin.Context) {
-		c.File("./static/views/login.html")
+		c.File("./static/views/auth/login.html")
 	})
 	r.POST("/login", authCtrl.Login)
 	r.GET("/logout", authCtrl.Logout)
 
-	// SEMÁFORO DE REDIRECCIÓN
+	// Dashboard inteligente (Semáforo de redirección)
 	r.GET("/dashboard", utils.JWTAuthMiddleware(), authCtrl.RedirectByRole)
 
 	// ---------------------------------------------------------
-	// VISTAS DASHBOARD (HTML)
+	// SECCIÓN ADMIN
 	// ---------------------------------------------------------
-	vistas := r.Group("/")
-	vistas.Use(utils.JWTAuthMiddleware())
+	admin := r.Group("/admin")
+	admin.Use(utils.JWTAuthMiddleware(), utils.RoleMiddleware("admin"))
 	{
-		// Panel Admin
-		vistas.GET("/admin", func(c *gin.Context) {
-			c.File("./static/views/admin.html")
+		// Ruta raíz del grupo admin
+		admin.GET("/", func(c *gin.Context) {
+			fmt.Println("[ROUTER] 🖥️ Cargando Panel: Admin")
+			c.File("./static/views/admin/admin.html")
 		})
-
-		// Módulo Usuarios
-		usersGroup := vistas.Group("/dashboard/users")
-		{
-			uHandler := func(c *gin.Context) { c.File("./static/views/user.html") }
-			usersGroup.GET("", uHandler)
-			usersGroup.GET("/", uHandler)
-			usersGroup.GET("/manage", func(c *gin.Context) {
-				c.File("./static/views/user_crud.html")
-			})
-		}
-
-		// Módulo Clientes
-		clientsGroup := vistas.Group("/dashboard/clients")
-		{
-			clHandler := func(c *gin.Context) { c.File("./static/views/admin_client.html") }
-			clientsGroup.GET("", clHandler)
-			clientsGroup.GET("/", clHandler)
-			clientsGroup.GET("/manage", func(c *gin.Context) {
-				c.File("./static/views/admin_client_crud.html")
-			})
-		}
-
-		// Otras vistas directas
-		vistas.GET("/drivers", func(c *gin.Context) { c.File("./static/views/drivers.html") })
-		vistas.GET("/companies", func(c *gin.Context) { c.File("./static/views/companies.html") })
+		admin.GET("/users", func(c *gin.Context) { c.File("./static/views/admin/admin_user.html") })
+		admin.GET("/users/manage", func(c *gin.Context) { c.File("./static/views/admin/admin_user_crud.html") })
+		admin.GET("/clients", func(c *gin.Context) { c.File("./static/views/admin/admin_client.html") })
+		admin.GET("/clients/manage", func(c *gin.Context) { c.File("./static/views/admin/admin_client_crud.html") })
 	}
 
 	// ---------------------------------------------------------
-	// API V1 (Endpoints JSON)
+	// SECCIÓN CLIENTE (Corregida para evitar 404)
+	// ---------------------------------------------------------
+	client := r.Group("/client")
+	client.Use(utils.JWTAuthMiddleware(), utils.RoleMiddleware("client"))
+	{
+		// Definimos la raíz del grupo claramente
+		client.GET("/", func(c *gin.Context) {
+			fmt.Println("[ROUTER] 👤 Cargando Panel: Cliente")
+			c.Header("Content-Type", "text/html; charset=utf-8")
+			c.File("./static/views/client/client.html")
+		})
+
+		// Sub-rutas de Cliente (Basadas en tu lista de opciones)
+		client.GET("/profile", func(c *gin.Context) { c.File("./static/views/client/client_profile.html") })
+		client.GET("/settings", func(c *gin.Context) { c.File("./static/views/client/client_settings.html") })
+		client.GET("/account", func(c *gin.Context) { c.File("./static/views/client/client_account.html") })
+		client.GET("/balance", func(c *gin.Context) { c.File("./static/views/client/client_balance.html") })
+		client.GET("/payment-methods", func(c *gin.Context) { c.File("./static/views/client/client_payment_methods.html") })
+		client.GET("/bookings", func(c *gin.Context) { c.File("./static/views/client/client_bookings.html") })
+		client.GET("/bookings/new", func(c *gin.Context) { c.File("./static/views/client/client_booking_new.html") })
+		client.GET("/rides", func(c *gin.Context) { c.File("./static/views/client/client_rides.html") })
+		client.GET("/payments", func(c *gin.Context) { c.File("./static/views/client/client_payments.html") })
+		client.GET("/invoices", func(c *gin.Context) { c.File("./static/views/client/client_invoices.html") })
+		client.GET("/ratings", func(c *gin.Context) { c.File("./static/views/client/client_ratings.html") })
+	}
+
+	// ---------------------------------------------------------
+	// SECCIÓN CONDUCTOR (Driver)
+	// ---------------------------------------------------------
+	driver := r.Group("/driver")
+	driver.Use(utils.JWTAuthMiddleware(), utils.RoleMiddleware("driver"))
+	{
+		driver.GET("/", func(c *gin.Context) {
+			fmt.Println("[ROUTER] 🚗 Cargando Panel: Conductor")
+			c.File("./static/views/driver/driver.html")
+		})
+	}
+
+	// ---------------------------------------------------------
+	// SECCIÓN EMPRESA (Company)
+	// ---------------------------------------------------------
+	company := r.Group("/company")
+	company.Use(utils.JWTAuthMiddleware(), utils.RoleMiddleware("company"))
+	{
+		company.GET("/", func(c *gin.Context) {
+			fmt.Println("[ROUTER] 🏢 Cargando Panel: Empresa")
+			c.File("./static/views/company/company.html")
+		})
+	}
+
+	// ---------------------------------------------------------
+	// API V1 (Endpoints de datos JSON)
 	// ---------------------------------------------------------
 	api := r.Group("/api/v1")
 	api.Use(utils.JWTAuthMiddleware())
@@ -103,53 +135,24 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		api.PUT("/clients/:id", clientCtrl.PUT)
 		api.DELETE("/clients/:id", clientCtrl.DELETE)
 
-		// Empresas
+		// Empresas y Conductores
 		api.GET("/companies", companyCtrl.GetAll)
 		api.POST("/companies", companyCtrl.POST)
-		api.GET("/companies/:id", companyCtrl.Get)
-		api.PUT("/companies/:id", companyCtrl.PUT)
-		api.DELETE("/companies/:id", companyCtrl.DELETE)
-
-		// Conductores
 		api.GET("/drivers", driverCtrl.GetAll)
 		api.POST("/drivers", driverCtrl.POST)
-		api.GET("/drivers/:id", driverCtrl.Get)
-		api.PUT("/drivers/:id", driverCtrl.PUT)
-		api.DELETE("/drivers/:id", driverCtrl.DELETE)
 
-		// Vehículos
+		// Flota y Reservas
 		api.GET("/vehicles", vehicleCtrl.GetAll)
 		api.POST("/vehicles", vehicleCtrl.POST)
-		api.GET("/vehicles/:id", vehicleCtrl.Get)
-		api.PUT("/vehicles/:id", vehicleCtrl.PUT)
-		api.DELETE("/vehicles/:id", vehicleCtrl.DELETE)
-
-		// Reservas
 		api.GET("/bookings", bookingCtrl.GetAll)
 		api.POST("/bookings", bookingCtrl.POST)
-		api.GET("/bookings/:id", bookingCtrl.Get)
-		api.PUT("/bookings/:id", bookingCtrl.PUT)
-		api.DELETE("/bookings/:id", bookingCtrl.DELETE)
-
-		// Viajes (Rides) - USANDO rideCtrl
 		api.GET("/rides", rideCtrl.GetAll)
 		api.POST("/rides", rideCtrl.POST)
-		api.GET("/rides/:id", rideCtrl.Get)
-		api.PUT("/rides/:id", rideCtrl.PUT)
-		api.DELETE("/rides/:id", rideCtrl.DELETE)
 
-		// Pagos - USANDO paymentCtrl
+		// Otros
 		api.GET("/payments", paymentCtrl.GetAll)
-		api.POST("/payments", paymentCtrl.POST)
-		api.GET("/payments/:id", paymentCtrl.Get)
-
-		// Eventos - USANDO eventCtrl
 		api.GET("/events", eventCtrl.GetAll)
-		api.POST("/events", eventCtrl.POST)
-
-		// Valoraciones - USANDO ratingCtrl
 		api.GET("/ratings", ratingCtrl.GetAll)
-		api.POST("/ratings", ratingCtrl.POST)
 	}
 
 	return r

@@ -1,10 +1,3 @@
-/**
- * @file auth.go
- * @package utils
- * @description Utilidades de seguridad. Contiene la lógica de encriptación bcrypt,
- * generación/limpieza de cookies JWT y el Middleware de autenticación.
- */
-
 package utils
 
 import (
@@ -18,37 +11,29 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Nombre de la cookie que almacenará el token
 const AuthCookieName = "transfers_session"
 
-// ---------------------------------------------------------------------
-// --- Utilidades de Hashing
-// ---------------------------------------------------------------------
+// --- Seguridad Base ---
 
-// GenerateHashPassword convierte texto plano en hash bcrypt
 func GenerateHashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-// CheckPasswordHash compara contraseña vs hash
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
-// ---------------------------------------------------------------------
-// --- Gestión de Cookies y JWT
-// ---------------------------------------------------------------------
-
-// GenerateAuthCookie crea una cookie HttpOnly con claims de usuario y rol
+// --- Generador de Token y Cookie ---
+// Esta es la función que faltaba y causaba el error undefined
 func GenerateAuthCookie(userID uint, role string) (*http.Cookie, error) {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
-		return nil, fmt.Errorf("JWT_SECRET no configurado en .env")
+		return nil, fmt.Errorf("JWT_SECRET no configurado")
 	}
 
-	expirationTime := time.Now().Add(time.Hour * 24) // 24 horas de validez
+	expirationTime := time.Now().Add(time.Hour * 24)
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
@@ -65,51 +50,72 @@ func GenerateAuthCookie(userID uint, role string) (*http.Cookie, error) {
 		Name:     AuthCookieName,
 		Value:    tokenString,
 		Expires:  expirationTime,
-		HttpOnly: true,  // Protege contra XSS
-		Secure:   false, // Cambiar a true en producción con HTTPS
+		HttpOnly: true,
+		Secure:   false, // Cambiar a true si usas HTTPS en producción
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	}, nil
 }
 
-// ClearAuthCookie elimina la cookie de sesión
-func ClearAuthCookie(c *gin.Context) {
-	c.SetCookie(AuthCookieName, "", -1, "/", "", false, true)
-}
+// --- Middlewares de Auditoría y Control ---
 
-// ---------------------------------------------------------------------
-// --- Middleware de Autenticación
-// ---------------------------------------------------------------------
-
-// JWTAuthMiddleware valida la cookie en cada petición protegida
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		secretKey := os.Getenv("JWT_SECRET")
+		now := time.Now().Format("2006-01-02 15:04:05")
+		path := c.Request.URL.Path
+		method := c.Request.Method
 
 		cookie, err := c.Request.Cookie(AuthCookieName)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Sesión no iniciada"})
+			fmt.Printf("[%s] ⚠️  ACCESO ANÓNIMO | %s %s | Motivo: No hay cookie\n", now, method, path)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Inicie sesión"})
 			return
 		}
 
-		// Parsear y validar el token
 		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("método de firma inesperado")
-			}
 			return []byte(secretKey), nil
 		})
 
 		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Sesión inválida o expirada"})
+			fmt.Printf("[%s] 🚫 TOKEN INVÁLIDO | %s %s | Error: %v\n", now, method, path, err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Sesión inválida"})
 			return
 		}
 
-		// Inyectar claims en el contexto de Gin para los controladores
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			c.Set("userID", uint(claims["user_id"].(float64)))
-			c.Set("userRole", claims["role"].(string))
+			uid := uint(claims["user_id"].(float64))
+			role := claims["role"].(string)
+
+			fmt.Printf("[%s] ✅ LLAMADA | %s %s | UserID: %d | Rol: [%s]\n", now, method, path, uid, role)
+
+			c.Set("userID", uid)
+			c.Set("userRole", role)
 			c.Next()
 		}
+	}
+}
+
+func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userRole, _ := c.Get("userRole")
+		userID, _ := c.Get("userID")
+		now := time.Now().Format("15:04:05")
+		path := c.Request.URL.Path
+
+		isAllowed := false
+		for _, role := range allowedRoles {
+			if role == userRole {
+				isAllowed = true
+				break
+			}
+		}
+
+		if !isAllowed {
+			fmt.Printf("[%s] 🛑 BLOQUEO DE ROL | User: %v [%s] intentó entrar a %s (Permitido solo para: %v)\n", now, userID, userRole, path, allowedRoles)
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Acceso denegado"})
+			return
+		}
+		c.Next()
 	}
 }
