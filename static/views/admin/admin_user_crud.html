@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuario | Sistema Central</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#064e3b',
+                            primary: '#10b981',
+                            light: '#f8fafc',
+                            accent: '#d1fae5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .nav-model-btn { 
+            @apply bg-white text-brand-primary text-[10px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-sm hover:bg-brand-primary hover:text-black transition-all whitespace-nowrap; 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-brand-light min-h-screen font-sans">
+
+<nav class="bg-black p-4 shadow-2xl sticky top-0 z-50 border-b-2 border-[#10b981]">
+    <div class="container mx-auto flex items-center justify-between gap-4">
+        
+        <div onclick="window.location.href='/dashboard/'" class="cursor-pointer shrink-0 flex items-center bg-[#10b981] px-4 py-2 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:scale-105 transition-transform">
+            <span class="text-white font-black text-xl tracking-tighter uppercase">Take</span>
+            <span class="text-black font-black text-xl tracking-tighter uppercase ml-0.5">Us</span>
+        </div>
+        
+        <div class="flex overflow-x-auto gap-2 no-scrollbar py-1">
+            <button onclick="window.location.href='/dashboard/users'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap ring-2 ring-white">Users</button>
+            <button onclick="window.location.href='/dashboard/clients'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Clients</button>
+            <button onclick="window.location.href='/dashboard/companies'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Companies</button>
+            <button onclick="window.location.href='/dashboard/drivers'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Drivers</button>
+            <button onclick="window.location.href='/dashboard/vehicles'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Vehicles</button>
+            <button onclick="window.location.href='/dashboard/bookings'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Bookings</button>
+            <button onclick="window.location.href='/dashboard/events'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Events</button>
+            <button onclick="window.location.href='/dashboard/rides'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Rides</button>
+            <button onclick="window.location.href='/dashboard/payments'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Payments</button>
+            <button onclick="window.location.href='/dashboard/ratings'" class="bg-[#10b981] text-black text-[11px] font-black uppercase tracking-tighter px-4 py-2 rounded shadow-lg hover:bg-white hover:text-[#10b981] transition-all whitespace-nowrap">Ratings</button>
+        </div>
+
+        <div class="flex gap-2 shrink-0">
+            <button onclick="exportData('pdf')" class="w-9 h-9 flex items-center justify-center rounded-full bg-red-600 text-white hover:bg-white hover:text-red-600 border-2 border-transparent hover:border-red-600 transition-all">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+            </button>
+            <button onclick="exportData('excel')" class="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-600 text-white hover:bg-white hover:text-emerald-600 border-2 border-transparent hover:border-emerald-600 transition-all">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
+            </button>
+            <button onclick="window.location.href='/dashboard/'" class="w-9 h-9 flex items-center justify-center rounded-full bg-white text-black hover:bg-black hover:text-white border-2 border-black transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<main class="container mx-auto py-8 px-4">
+    <div class="max-w-md mx-auto">
+        <h2 id="page-title" class="text-2xl font-black text-black uppercase italic mb-6 text-center">Formulario</h2>
+        
+        <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-gray-100">
+            <span id="form-subtitle" class="hidden"></span>
+
+            <form id="crud-form" class="p-6 md:p-8 space-y-4">
+                <input type="hidden" id="userId">
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Username</label>
+                        <input type="text" id="username" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Email Corporativo</label>
+                        <input type="email" id="email" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Contraseña</label>
+                            <input type="password" id="password" class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Rol</label>
+                            <select id="role" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-xs transition-all shadow-inner uppercase">
+                                <option value="admin">Admin</option>
+                                <option value="client">Client</option>
+                                <option value="driver">Driver</option>
+                                <option value="company">Company</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p id="pass-hint" class="text-[9px] text-[#10b981] font-bold italic px-1 hidden leading-none">Opcional: Dejar vacío para no cambiar</p>
+                </div>
+
+                <div class="flex items-center gap-3 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                    <input type="checkbox" id="is_active" checked class="w-5 h-5 accent-[#10b981] cursor-pointer">
+                    <div class="flex flex-col">
+                        <span class="text-[11px] font-black text-emerald-800 uppercase tracking-tighter leading-none">Cuenta Habilitada</span>
+                        <span class="text-[9px] text-gray-500 font-medium">Permitir inicio de sesión</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 pt-2">
+                    <button type="submit" id="btn-save" class="w-full bg-black text-[#10b981] py-3.5 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-emerald-900 hover:text-white transition-all shadow-lg active:scale-95">
+                        Guardar Registro
+                    </button>
+                    
+                    <button type="button" id="btn-delete" class="hidden w-full bg-white text-red-500 border border-red-100 py-2 rounded-xl font-black uppercase text-[9px] tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                        Eliminar permanentemente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+    <script src="/js/admin_user_crud.js"></script>
+</body>
+</html>

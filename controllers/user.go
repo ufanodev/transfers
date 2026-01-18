@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 	"transfers/models"
-	"transfers/utils" // Importante para el hashing
+	"transfers/utils" // Importante para el hashing y JWT
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,6 +12,35 @@ import (
 // UserController define el controlador para el modelo User
 type UserController struct {
 	DB *gorm.DB
+}
+
+// GetMe - GET /api/v1/users/me
+// Este método identifica al usuario actual mediante el token JWT
+func (ctrl *UserController) GetMe(c *gin.Context) {
+	// 1. Obtener el ID del usuario inyectado por el Middleware
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Sesión no válida o expirada"})
+		return
+	}
+
+	// 2. Buscar al usuario en la base de datos
+	var user models.User
+	if err := ctrl.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
+		return
+	}
+
+	// 3. Retornar datos seguros (omitimos el hash de password)
+	c.JSON(http.StatusOK, gin.H{
+		"id":        user.ID,
+		"username":  user.Username,
+		"email":     user.Email,
+		"role":      user.Role,
+		"is_active": user.IsActive,
+		// Si tienes campos como FirstName o LastName en tu modelo, añádelos aquí:
+		// "first_name": user.FirstName,
+	})
 }
 
 // GetAll - GET /api/v1/users

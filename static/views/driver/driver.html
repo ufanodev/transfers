@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Conductor | TakeUs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#064e3b',   
+                            primary: '#10b981', 
+                            light: '#f0fdf4',   
+                            accent: '#d1fae5',  
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-72 bg-black text-white flex flex-col shadow-2xl overflow-y-auto border-r border-gray-800">
+        <div class="p-8 text-center border-b border-gray-900">
+            <h2 class="text-2xl font-black italic tracking-tighter uppercase">Take<span class="text-brand-primary">Us</span></h2>
+            <p class="text-[9px] text-brand-primary font-bold tracking-[0.3em] mt-1 uppercase italic">Unidad de Conducción</p>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-8">
+            
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2 italic">🏠 Panel Conductor</h3>
+                <ul class="space-y-1">
+                    <li><a href="/driver/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand-primary text-black font-bold transition-all"><i class="fa-solid fa-gauge-high w-5"></i> Dashboard</a></li>
+                    <li><a href="/driver/profile" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-id-badge w-5"></i> Mi Perfil</a></li>
+                    <li><a href="/driver/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-gears w-5"></i> Ajustes</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2 italic">📋 Mi Información</h3>
+                <ul class="space-y-1">
+                    <li><a href="/driver/license" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-address-card w-5"></i> Licencia</a></li>
+                    <li><a href="/driver/vehicle" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-car-side w-5"></i> Vehículo Asignado</a></li>
+                    <li><a href="/driver/company" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-building-user w-5"></i> Mi Empresa</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2 italic">🚕 Mis Viajes</h3>
+                <ul class="space-y-1">
+                    <li><a href="/driver/assignments/active" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-yellow-400 text-black font-black hover:bg-yellow-500 transition-all mb-2 animate-pulse"><i class="fa-solid fa-location-crosshairs"></i> VIAJE EN CURSO</a></li>
+                    <li><a href="/driver/assignments" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-clipboard-list w-5"></i> Asignaciones</a></li>
+                    <li><a href="/driver/map" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-map-marked-alt w-5"></i> Mapa de Ruta</a></li>
+                    <li><a href="/driver/rides" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-clock-rotate-left w-5"></i> Historial</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2 italic">📊 Eventos</h3>
+                <ul class="space-y-1">
+                    <li><a href="/driver/events/create" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-triangle-exclamation w-5"></i> Reportar Incidencia</a></li>
+                    <li><a href="/driver/events/log" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-book w-5"></i> Registro de Eventos</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2 italic">💰 Mis Ganancias</h3>
+                <ul class="space-y-1">
+                    <li><a href="/driver/earnings/today" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-hand-holding-dollar w-5"></i> Corte del Día</a></li>
+                    <li><a href="/driver/earnings/history" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-file-invoice w-5"></i> Liquidaciones</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2 italic">⭐ Reputación</h3>
+                <ul class="space-y-1">
+                    <li><a href="/driver/ratings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-star-half-stroke w-5"></i> Mis Valoraciones</a></li>
+                </ul>
+            </div>
+
+        </nav>
+
+        <div class="p-4 border-t border-gray-900 bg-zinc-950">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <span class="text-[10px] font-black uppercase text-gray-500">Estado:</span>
+                <span class="text-[10px] font-black uppercase text-green-500 flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> En Línea</span>
+            </div>
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold hover:bg-red-500 hover:text-white transition-all text-xs uppercase tracking-widest">
+                <i class="fa-solid fa-power-off"></i> Finalizar Turno
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-brand-primary font-black text-lg border-2 border-brand-primary">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-gray-800 uppercase tracking-tighter">Bienvenido, <span id="driver-name" class="text-brand-primary">Cargando...</span></h1>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Matrícula: <span class="text-gray-600">6789-LMX</span></p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hoy acumulado</p>
+                    <p class="text-lg font-black text-brand-dark">€ 84.20</p>
+                </div>
+                <button class="bg-brand-light p-3 rounded-xl text-brand-primary hover:bg-brand-primary hover:text-white transition-all relative">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+                </button>
+            </div>
+        </header>
+
+        <section id="driver-content" class="p-8 overflow-y-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="lg:col-span-2 bg-black rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-6 opacity-20 group-hover:scale-125 transition-transform">
+                        <i class="fa-solid fa-taxi text-6xl text-brand-primary"></i>
+                    </div>
+                    <span class="inline-block px-3 py-1 bg-brand-primary text-black text-[10px] font-black rounded-full mb-4 uppercase tracking-tighter">Próxima recogida</span>
+                    <h3 class="text-3xl font-black mb-1 italic">Hotel Meliá Sky</h3>
+                    <p class="text-brand-primary/80 font-bold text-sm">Carrer de Pere IV, 272, Barcelona</p>
+                    <div class="mt-8 flex gap-4">
+                        <button class="bg-brand-primary text-black font-black px-6 py-3 rounded-xl text-xs uppercase tracking-widest hover:bg-white transition-all">Iniciar Viaje</button>
+                        <button class="bg-zinc-800 text-white font-black px-6 py-3 rounded-xl text-xs uppercase tracking-widest hover:bg-zinc-700 transition-all">Ver Mapa</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-car-on"></i>
+                        </div>
+                        <h4 class="font-black text-gray-400 uppercase text-[10px] tracking-widest">Viajes Hoy</h4>
+                        <p class="text-3xl font-black text-gray-800">12</p>
+                    </div>
+                    <div class="text-[10px] text-green-500 font-bold uppercase tracking-tighter">
+                        +2 que ayer
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-xl bg-yellow-50 text-yellow-500 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <h4 class="font-black text-gray-400 uppercase text-[10px] tracking-widest">Calificación</h4>
+                        <p class="text-3xl font-black text-gray-800">4.92</p>
+                    </div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                        Top 5% Flota
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 xl:grid-cols-3 gap-10">
+                <div class="xl:col-span-2 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 min-h-[400px]">
+                    <h3 class="font-black text-gray-800 uppercase tracking-widest text-sm mb-6 border-l-4 border-brand-primary pl-4 italic">Monitorización de Zona</h3>
+                    <div class="w-full h-full bg-gray-100 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-200 text-gray-300">
+                        <div class="text-center">
+                            <i class="fa-solid fa-satellite-dish text-5xl mb-4 animate-bounce"></i>
+                            <p class="font-black text-xs uppercase tracking-widest">Sincronizando GPS...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="font-black text-gray-800 uppercase tracking-widest text-sm italic">Centro de Mensajes</h3>
+                    <div class="bg-white p-5 rounded-2xl border-l-4 border-red-500 shadow-sm">
+                        <p class="text-[10px] font-black text-red-500 uppercase mb-1">Urgente - Tráfico</p>
+                        <p class="text-xs font-bold text-gray-700">Accidente en AP-7 dirección Norte. Evite salida 22.</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-l-4 border-brand-primary shadow-sm">
+                        <p class="text-[10px] font-black text-brand-primary uppercase mb-1">Sistema</p>
+                        <p class="text-xs font-bold text-gray-700">Recuerde subir la foto del ticket de combustible al finalizar el turno.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/driver/driver_dashboard.js"></script>
+</body>
+</html>

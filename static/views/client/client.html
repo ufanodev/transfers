@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Cliente | TakeUs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#064e3b',   
+                            primary: '#10b981', 
+                            light: '#f0fdf4',   
+                            accent: '#d1fae5',  
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-72 bg-black text-white flex flex-col shadow-2xl overflow-y-auto">
+        <div class="p-8 text-center border-b border-gray-800">
+            <h2 class="text-2xl font-black italic tracking-tighter uppercase">Take<span class="text-brand-primary">Us</span></h2>
+            <p class="text-[9px] text-brand-primary font-bold tracking-[0.3em] mt-1 uppercase">Portal Cliente</p>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-8">
+            
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2">🏠 Panel Cliente</h3>
+                <ul class="space-y-1">
+                    <li><a href="/client/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand-primary text-black font-bold transition-all"><i class="fa-solid fa-chart-line w-5"></i> Dashboard</a></li>
+                    <li><a href="/client/profile" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-user-gear w-5"></i> Mi Perfil</a></li>
+                    <li><a href="/client/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-sliders w-5"></i> Ajustes</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2">🧍 Mis Datos</h3>
+                <ul class="space-y-1">
+                    <li><a href="/client/account" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-id-card w-5"></i> Cuenta</a></li>
+                    <li><a href="/client/balance" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-wallet w-5"></i> Saldo / Crédito</a></li>
+                    <li><a href="/client/payment-methods" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-credit-card w-5"></i> Métodos de Pago</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2">📦 Mis Viajes</h3>
+                <ul class="space-y-1">
+                    <li><a href="/client/bookings/new" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white text-black font-black hover:bg-brand-primary transition-all mb-2"><i class="fa-solid fa-plus-circle"></i> NUEVA RESERVA</a></li>
+                    <li><a href="/client/bookings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-calendar-check w-5"></i> Reservas Activas</a></li>
+                    <li><a href="/client/rides" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-route w-5"></i> Historial de Viajes</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2">💳 Mis Pagos</h3>
+                <ul class="space-y-1">
+                    <li><a href="/client/payments" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-money-bill-transfer w-5"></i> Transacciones</a></li>
+                    <li><a href="/client/invoices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-file-invoice-dollar w-5"></i> Facturas</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4 px-2">⭐ Valoraciones</h3>
+                <ul class="space-y-1">
+                    <li><a href="/client/ratings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-900 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-star w-5"></i> Mis Reseñas</a></li>
+                </ul>
+            </div>
+
+        </nav>
+
+        <div class="p-4 border-t border-gray-800">
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold hover:bg-red-500 hover:text-white transition-all text-xs uppercase tracking-widest">
+                <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm">
+            <div>
+                <h1 class="text-xl font-black text-gray-800 uppercase tracking-tighter">Bienvenido, <span id="user-name" class="text-brand-primary">Cargando...</span></h1>
+                <p class="text-xs text-gray-400 font-medium">Gestiona tus servicios de transporte hoy.</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-right mr-2">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Saldo Disponible</p>
+                    <p class="text-lg font-black text-gray-800">€ 142.50</p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-brand-accent flex items-center justify-center text-brand-dark font-black text-lg border-2 border-brand-primary/20">
+                    JD
+                </div>
+            </div>
+        </header>
+
+        <section id="main-content" class="p-8 overflow-y-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 hover:border-brand-primary transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center text-brand-primary mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 uppercase text-xs tracking-widest mb-1">Último Viaje</h4>
+                    <p class="text-2xl font-black text-gray-800">Aeropuerto VLC</p>
+                    <p class="text-xs text-gray-400 mt-2">Finalizado hace 2 días</p>
+                </div>
+
+                <div class="bg-black p-6 rounded-3xl border border-gray-800 shadow-xl hover:bg-brand-dark transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center text-brand-primary mb-4">
+                        <i class="fa-solid fa-calendar-days text-xl"></i>
+                    </div>
+                    <h4 class="font-black text-gray-400 uppercase text-[10px] tracking-widest mb-1">Próxima Reserva</h4>
+                    <p class="text-2xl font-black text-white">Lunes, 09:00 AM</p>
+                    <p class="text-xs text-brand-primary/70 mt-2 font-bold uppercase tracking-tighter italic">Confirmado</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 hover:border-brand-primary transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center text-brand-primary mb-4">
+                        <i class="fa-solid fa-receipt text-xl"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 uppercase text-xs tracking-widest mb-1">Facturas Pendientes</h4>
+                    <p class="text-2xl font-black text-gray-800">0</p>
+                    <p class="text-xs text-green-500 mt-2 font-bold uppercase tracking-tighter">Todo al día</p>
+                </div>
+            </div>
+
+            <div class="mt-10 bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+                <h3 class="font-black text-gray-800 uppercase tracking-widest text-sm mb-6 border-l-4 border-brand-primary pl-4">Estado del Servicio</h3>
+                <div class="h-64 flex flex-col items-center justify-center text-gray-300 border-2 border-dashed border-gray-50 rounded-2xl">
+                    <i class="fa-solid fa-map-location-dot text-5xl mb-4"></i>
+                    <p class="font-bold text-sm italic">Seleccione una opción del menú para comenzar</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/client/client.js"></script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Empresa | TakeUs Business</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',   // Slate 900
+                            primary: '#10b981', // Emerald 500
+                            secondary: '#6366f1', // Indigo 500
+                            light: '#f8fafc',   // Slate 50
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-80 bg-brand-dark text-white flex flex-col shadow-2xl overflow-y-auto">
+        <div class="p-8 text-center border-b border-slate-800">
+            <h2 class="text-2xl font-black italic tracking-tighter uppercase">Take<span class="text-brand-primary">Us</span></h2>
+            <p class="text-[9px] text-slate-400 font-bold tracking-[0.3em] mt-1 uppercase">Business Management</p>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-8">
+            
+            <div>
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 px-2">🏠 Panel Empresa</h3>
+                <ul class="space-y-1">
+                    <li><a href="/company/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-brand-primary text-black font-bold transition-all"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a></li>
+                    <li><a href="/company/profile" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-briefcase w-5"></i> Perfil Empresa</a></li>
+                    <li><a href="/company/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-sliders w-5"></i> Configuración</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 px-2 text-brand-secondary">👥 Gestión de Recursos</h3>
+                <ul class="space-y-1">
+                    <li><a href="/company/drivers" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-users w-5"></i> Conductores</a></li>
+                    <li><a href="/company/vehicles" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-car w-5"></i> Vehículos</a></li>
+                    <li><a href="/company/fleet/map" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-map-location-dot w-5"></i> Mapa de Flota</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 px-2">📊 Operaciones</h3>
+                <ul class="space-y-1">
+                    <li><a href="/company/bookings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-calendar-check w-5"></i> Reservas Globales</a></li>
+                    <li><a href="/company/rides/active" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all font-bold"><i class="fa-solid fa-signal text-brand-primary w-5"></i> Servicios Activos</a></li>
+                    <li><a href="/company/events" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-clipboard-list w-5"></i> Log de Auditoría</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 px-2 text-brand-primary">💰 Finanzas</h3>
+                <ul class="space-y-1">
+                    <li><a href="/company/payments" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-money-bill-trend-up w-5"></i> Liquidaciones</a></li>
+                    <li><a href="/company/invoices" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-file-invoice-dollar w-5"></i> Facturación</a></li>
+                    <li><a href="/company/financial/reports" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-chart-line w-5"></i> Reportes Financieros</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 px-2">📈 Analíticas</h3>
+                <ul class="space-y-1">
+                    <li><a href="/company/analytics" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-bolt w-5"></i> Rendimiento</a></li>
+                    <li><a href="/company/ratings" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-star-half-stroke w-5"></i> Valoraciones Fleet</a></li>
+                </ul>
+            </div>
+
+        </nav>
+
+        <div class="p-4 border-t border-slate-800 bg-brand-dark">
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-red-500/10 text-red-500 font-bold hover:bg-red-600 hover:text-white transition-all text-xs uppercase tracking-widest">
+                <i class="fa-solid fa-door-open"></i> Salir del Sistema
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
+            <div>
+                <h1 class="text-xl font-black text-slate-800 uppercase tracking-tighter">Panel: <span id="company-name" class="text-brand-secondary">Cargando Empresa...</span></h1>
+                <p class="text-xs text-slate-400 font-medium">Control operativo de flota centralizado.</p>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="hidden md:flex gap-6 border-r pr-6 border-slate-200">
+                    <div class="text-right">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Vehículos Activos</p>
+                        <p class="text-lg font-black text-brand-primary">14/18</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Facturación Mes</p>
+                        <p class="text-lg font-black text-slate-800">€ 12.450</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section id="company-content" class="p-8 overflow-y-auto space-y-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center text-brand-primary text-xl">
+                            <i class="fa-solid fa-id-card"></i>
+                        </div>
+                        <span class="text-[10px] font-black text-green-500 bg-green-50 px-2 py-1 rounded-lg">+3 hoy</span>
+                    </div>
+                    <h4 class="text-2xl font-black text-slate-800">24</h4>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Conductores en Plantilla</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-brand-secondary text-xl">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-black text-slate-800">156</h4>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Reservas para hoy</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 border-l-4 border-l-red-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 text-xl">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-black text-slate-800">2</h4>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Vehículos en Taller</p>
+                </div>
+
+                <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-brand-primary text-xl">
+                            <i class="fa-solid fa-gauge-simple-high"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-2xl font-black text-white">94%</h4>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Eficiencia de Flota</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div class="xl:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm border-l-4 border-brand-secondary pl-4 italic">Monitorización de Servicios Tiempo Real</h3>
+                        <a href="/company/rides/active" class="text-[10px] font-black text-brand-secondary uppercase hover:underline">Ver mapa completo</a>
+                    </div>
+                    
+                    <div class="h-80 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-100 flex items-center justify-center">
+                        <div class="text-center space-y-4">
+                            <i class="fa-solid fa-tower-broadcast text-4xl text-slate-200 animate-pulse"></i>
+                            <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Sincronizando flujo de datos...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="font-black text-slate-800 uppercase tracking-widest text-sm italic">Acciones Críticas</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <button onclick="location.href='/company/drivers/manage'" class="w-full p-4 bg-brand-primary/10 text-brand-primary rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all text-left flex justify-between items-center">
+                            Alta de Conductor <i class="fa-solid fa-plus-circle"></i>
+                        </button>
+                        <button onclick="location.href='/company/fleet'" class="w-full p-4 bg-brand-secondary/10 text-brand-secondary rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-secondary hover:text-white transition-all text-left flex justify-between items-center">
+                            Inspección de Flota <i class="fa-solid fa-car-burst"></i>
+                        </button>
+                        <button onclick="location.href='/company/financial/reports'" class="w-full p-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 hover:text-white transition-all text-left flex justify-between items-center">
+                            Cierre de Caja <i class="fa-solid fa-vault"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Últimas Valoraciones</h4>
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-yellow-500 text-xs font-bold">5.0</div>
+                                <p class="text-[11px] text-slate-600 font-medium">"Excelente servicio de Juan P. en el traslado al puerto."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    
+
+    <script src="/js/company/company_dashboard.js"></script>
+</body>
+</html>
