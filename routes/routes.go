@@ -87,7 +87,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	}
 
 	// ---------------------------------------------------------
-	// SECCIONES OTROS ROLES (Singular)
+	// SECCIONES OTROS ROLES
 	// ---------------------------------------------------------
 	r.GET("/client/", utils.JWTAuthMiddleware(), utils.RoleMiddleware("client"), func(c *gin.Context) {
 		c.File("static/views/client/client.html")
@@ -105,21 +105,23 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	api := r.Group("/api/v1")
 	api.Use(utils.JWTAuthMiddleware())
 	{
-		// 🆔 Identidad del usuario logueado
 		api.GET("/users/me", userCtrl.GetMe)
 
-		// 👥 CRUD USUARIOS (Completo)
+		// 👥 CRUD USUARIOS
 		api.GET("/users", userCtrl.GetAll)
 		api.POST("/users", userCtrl.POST)
-		api.GET("/users/:id", userCtrl.Get)       // <--- SOLUCIONA EL 404 DE CARGA
-		api.PUT("/users/:id", userCtrl.PUT)       // <--- SOLUCIONA EL 404 DE GUARDAR
-		api.DELETE("/users/:id", userCtrl.DELETE) // <--- SOLUCIONA EL 404 DE BORRADO
+		api.GET("/users/:id", userCtrl.Get)
+		api.PUT("/users/:id", userCtrl.PUT)
+		api.DELETE("/users/:id", userCtrl.DELETE)
 
-		// 💼 CRUD CLIENTES (Preparado)
+		// 💼 CRUD CLIENTES (Actualizado con ID y métodos completos)
 		api.GET("/clients", clientCtrl.GetAll)
-		// api.GET("/clients/:id", clientCtrl.Get)
+		api.POST("/clients", clientCtrl.POST)         // Crear Cliente
+		api.GET("/clients/:id", clientCtrl.Get)       // Carga datos en CRUD
+		api.PUT("/clients/:id", clientCtrl.PUT)       // Actualizar Cliente
+		api.DELETE("/clients/:id", clientCtrl.DELETE) // Eliminar Cliente
 
-		// 🚗 Endpoints de Datos
+		// 🚗 Endpoints de Datos Generales
 		api.GET("/drivers", driverCtrl.GetAll)
 		api.GET("/vehicles", vehicleCtrl.GetAll)
 		api.GET("/companies", companyCtrl.GetAll)

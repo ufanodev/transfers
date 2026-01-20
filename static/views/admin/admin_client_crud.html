@@ -1,98 +1,133 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Cliente | TakeUs Central</title>
+    <title>TakeUs Admin | Gestión de Cliente</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            dark: '#064e3b',
-                            primary: '#10b981',
-                            light: '#f8fafc',
-                            accent: '#d1fae5',
+                        admin: {
+                            dark: '#1e293b',
+                            accent: '#3b82f6',
+                            success: '#10b981'
                         }
                     }
                 }
             }
         }
     </script>
-    <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
 </head>
-<body class="bg-brand-light min-h-screen font-sans">
 
-<nav class="bg-black p-4 shadow-2xl sticky top-0 z-50 border-b-2 border-[#10b981]">
-    <div class="container mx-auto flex items-center justify-between gap-4">
-        <div onclick="window.location.href='/admin'" class="cursor-pointer shrink-0 flex items-center bg-[#10b981] px-4 py-2 rounded-lg shadow-lg hover:scale-105 transition-transform">
-            <span class="text-white font-black text-xl tracking-tighter uppercase leading-none">Take</span>
-            <span class="text-black font-black text-xl tracking-tighter uppercase ml-0.5 leading-none">Us</span>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-64 bg-admin-dark text-white flex flex-col shadow-2xl overflow-y-auto shrink-0 border-r border-slate-700">
+        <div class="p-6 text-center border-b border-slate-700">
+            <h2 onclick="window.location.href='/admin'" class="text-xl font-black italic tracking-tighter uppercase cursor-pointer">Take<span class="text-admin-accent">Us</span> <span class="text-[10px] bg-admin-accent px-1 rounded text-white ml-1">ADMIN</span></h2>
         </div>
         
-        <div class="flex overflow-x-auto gap-2 no-scrollbar py-1">
-            <button onclick="window.location.href='/dashboard/admin/users'" class="bg-[#10b981] text-black text-[11px] font-black uppercase px-4 py-2 rounded shadow hover:bg-white transition-all whitespace-nowrap">Users</button>
-            <button onclick="window.location.href='/dashboard/admin/clients'" class="bg-[#10b981] text-black text-[11px] font-black uppercase px-4 py-2 rounded shadow hover:bg-white transition-all whitespace-nowrap ring-2 ring-white">Clients</button>
+        <nav class="flex-1 px-4 py-6 space-y-6">
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Gestión de Sistema</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/users" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                    <li><a href="/admin/clients" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold transition-all shadow-lg text-[11.5px]"><i class="fa-solid fa-address-book"></i> Clientes</a></li>
+                    <li><a href="/admin/companies" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-building"></i> Empresas</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Logística</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/drivers" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-id-card"></i> Conductores</a></li>
+                    <li><a href="/admin/vehicles" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-car"></i> Vehículos</a></li>
+                    <li><a href="/admin/rides" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-route"></i> Viajes (Rides)</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="p-4 bg-slate-900">
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-red-500/20 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all text-xs">
+                <i class="fa-solid fa-power-off"></i> SALIR
+            </a>
         </div>
+    </aside>
 
-        <button onclick="window.location.href='/dashboard/admin/clients'" class="w-9 h-9 flex items-center justify-center rounded-full bg-white text-black hover:bg-black hover:text-white border-2 border-black transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </button>
-    </div>
-</nav>
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-black p-3 shadow-2xl border-b-2 border-admin-accent flex items-center justify-between">
+            <div class="flex gap-2">
+                <button onclick="window.location.href='/admin/clients'" class="bg-admin-accent text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-white hover:text-admin-accent transition-all whitespace-nowrap">Volver a lista</button>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="window.location.href='/admin'" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black border border-black transition-all hover:bg-admin-accent hover:text-white"><i class="fa-solid fa-home text-[10px]"></i></button>
+            </div>
+        </header>
 
-<main class="container mx-auto py-8 px-4">
-    <div class="max-w-md mx-auto">
-        <h2 id="page-title" class="text-2xl font-black text-black uppercase italic mb-6 text-center tracking-tighter underline decoration-[#10b981] decoration-4 underline-offset-8">Formulario Cliente</h2>
-        
-        <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
-            <form id="crud-form" class="p-6 md:p-8 space-y-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-widest">ID de Usuario Vinculado</label>
-                    <input type="number" id="user_id" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner" placeholder="Ej: 42">
+        <section class="p-8 overflow-y-auto flex justify-center">
+            <div class="w-full max-w-md">
+                <h2 id="page-title" class="text-lg font-black text-slate-800 uppercase italic mb-6 text-center underline decoration-admin-accent decoration-4 underline-offset-8">Nuevo Cliente</h2>
+                
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+                    <form id="crud-form" class="p-8 space-y-4">
+                        <input type="hidden" id="clientId">
+                        
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Nombre Completo</label>
+                            <input type="text" id="full_name" name="full_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-admin-accent outline-none font-bold uppercase">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Email (Servirá como login)</label>
+                            <input type="email" id="email" name="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-admin-accent outline-none font-bold">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Teléfono / WhatsApp</label>
+                            <input type="text" id="phone" name="phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-admin-accent outline-none font-bold">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase ml-1">Preferencias / Notas</label>
+                            <textarea id="preferences" name="preferences" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] focus:ring-1 focus:ring-admin-accent outline-none font-mono" placeholder='{"lang": "es"}'></textarea>
+                        </div>
+
+                        <div class="flex flex-col gap-2 pt-4">
+                            <button type="submit" id="btn-save" class="w-full bg-admin-dark text-white py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-admin-accent transition-all shadow-lg active:scale-95">
+                                Guardar Ficha Cliente
+                            </button>
+                            
+                            <button type="button" id="btn-delete-trigger" class="hidden w-full text-red-500 text-[9px] font-black uppercase py-2 hover:text-red-700 transition-all italic">
+                                — Eliminar Ficha de Cliente —
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
+        </section>
+    </main>
 
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-widest">Nombre Completo</label>
-                    <input type="text" id="full_name" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner uppercase">
-                </div>
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border-2 border-red-500">
+            <h3 class="text-red-600 font-black uppercase italic mb-2 text-sm">¡Borrado Seguro!</h3>
+            <p class="text-[11px] text-slate-500 mb-6 font-medium leading-tight">Para confirmar el borrado de <span id="confirm-client-name" class="font-bold text-slate-800"></span>, escriba los datos exactos:</p>
+            
+            <div class="space-y-3">
+                <input type="text" id="confirm-name" placeholder="Nombre completo" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-[10px] font-bold outline-none focus:border-red-500 transition-all uppercase">
+                <input type="email" id="confirm-email" placeholder="Email del cliente" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-[10px] font-bold outline-none focus:border-red-500 transition-all">
+                <input type="text" id="confirm-key" placeholder="Escriba 'ELIMINAR'" class="w-full bg-red-50 border border-red-100 rounded-lg py-2 px-3 text-[10px] font-bold outline-none text-red-600 font-black uppercase">
+            </div>
 
-                <div class="grid grid-cols-1 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-widest">Email Contacto</label>
-                        <input type="email" id="email" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner">
-                    </div>
-
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-widest">Teléfono / WhatsApp</label>
-                        <input type="text" id="phone" required class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-bold text-sm transition-all shadow-inner">
-                    </div>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-widest">Preferencias (JSON)</label>
-                    <textarea id="preferences" rows="2" class="w-full bg-gray-50 border-2 border-transparent rounded-xl px-4 py-2.5 focus:border-[#10b981] outline-none font-mono text-[10px] transition-all shadow-inner" placeholder='{"lang": "es", "newsletter": true}'></textarea>
-                </div>
-
-                <div class="flex flex-col gap-2 pt-4">
-                    <button type="submit" id="btn-save" class="w-full bg-black text-[#10b981] py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-[#10b981] hover:text-black transition-all shadow-lg active:scale-95 border border-[#10b981]">
-                        Confirmar Cliente
-                    </button>
-                    
-                    <button type="button" id="btn-delete" class="hidden w-full bg-white text-red-500 border border-red-100 py-2 rounded-xl font-black uppercase text-[9px] tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm">
-                        Eliminar Cliente
-                    </button>
-                </div>
-            </form>
+            <div class="flex gap-2 mt-8">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-200">Cancelar</button>
+                <button onclick="confirmFinalDelete()" class="flex-1 bg-red-600 text-white py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-red-500/30 hover:bg-red-700">Borrar</button>
+            </div>
         </div>
     </div>
-</main>
 
-<script src="/js/admin_client_crud.js"></script>
+    <script src="/js/admin/admin_client_crud.js"></script>
 </body>
 </html>

@@ -1,83 +1,144 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeUs | Gestión Clientes</title>
+    <title>TakeUs Admin | Gestión de Clientes</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        admin: {
+                            dark: '#1e293b',   // Slate 800
+                            accent: '#3b82f6', // Blue 500
+                            success: '#10b981' // Emerald 500
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .sort-icon { font-size: 8px; margin-left: 4px; opacity: 0.5; }
-        th.active-sort .sort-icon { opacity: 1; color: #10b981; }
+        body { font-size: 0.85rem; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans">
 
-    <nav class="bg-black p-3 shadow-2xl sticky top-0 z-50 border-b-2 border-[#10b981]">
-        <div class="container mx-auto flex items-center justify-between gap-4">
-            <div onclick="window.location.href='/dashboard/'" class="cursor-pointer shrink-0 flex items-center bg-[#10b981] px-3 py-1.5 rounded-lg shadow-lg hover:scale-105 transition-transform">
-                <span class="text-white font-black text-lg uppercase leading-none">Take</span>
-                <span class="text-black font-black text-lg uppercase ml-0.5 leading-none">Us</span>
-            </div>
-            
-            <div class="flex overflow-x-auto gap-2 no-scrollbar py-1">
-                <button onclick="window.location.href='/dashboard/users'" class="bg-[#10b981] text-black text-[10px] font-black uppercase px-3 py-1.5 rounded shadow hover:bg-white transition-all whitespace-nowrap">Users</button>
-                <button onclick="window.location.href='/clients'" class="bg-[#10b981] text-black text-[10px] font-black uppercase px-3 py-1.5 rounded shadow hover:bg-white transition-all whitespace-nowrap ring-1 ring-white">Clients</button>
-                <button onclick="window.location.href='/companies'" class="bg-[#10b981] text-black text-[10px] font-black uppercase px-3 py-1.5 rounded shadow hover:bg-white transition-all whitespace-nowrap">Companies</button>
-                <button onclick="window.location.href='/drivers'" class="bg-[#10b981] text-black text-[10px] font-black uppercase px-3 py-1.5 rounded shadow hover:bg-white transition-all whitespace-nowrap">Drivers</button>
-            </div>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
 
-            <div class="flex gap-2 shrink-0">
-                <button onclick="window.location.href='/dashboard/'" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-black hover:bg-black hover:text-white border border-black transition-all shadow-lg">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </button>
-            </div>
+    <aside class="w-64 bg-admin-dark text-white flex flex-col shadow-2xl overflow-y-auto shrink-0 border-r border-slate-700">
+        <div class="p-6 text-center border-b border-slate-700">
+            <h2 onclick="window.location.href='/admin'"
+                class="text-xl font-black italic tracking-tighter uppercase cursor-pointer">Take<span
+                    class="text-admin-accent">Us</span> <span
+                    class="text-[10px] bg-admin-accent px-1 rounded text-white ml-1">ADMIN</span></h2>
         </div>
-    </nav>
-
-    <main class="container mx-auto py-6 px-4 max-w-4xl">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-black text-black uppercase italic tracking-tighter">Clientes</h2>
-            <button onclick="window.location.href='/dashboard/clients/manage'" 
-                class="bg-black text-[#10b981] px-4 py-2 rounded-lg font-black text-[10px] hover:bg-[#10b981] hover:text-black transition-all shadow-xl border border-[#10b981] uppercase">
-                + NUEVO CLIENTE
-            </button>
+        <nav class="flex-1 px-4 py-6 space-y-6">
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Gestión de Sistema</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/users" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                    <li><a href="/admin/clients" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold transition-all shadow-lg text-[11.5px]"><i class="fa-solid fa-address-book"></i> Clientes</a></li>
+                    <li><a href="/admin/companies" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-building"></i> Empresas</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Logística</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/drivers" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-id-card"></i> Conductores</a></li>
+                    <li><a href="/admin/vehicles" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-car"></i> Vehículos</a></li>
+                    <li><a href="/admin/rides" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-route"></i> Viajes (Rides)</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="p-4 bg-slate-900">
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-red-500/20 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all text-xs">
+                <i class="fa-solid fa-power-off"></i> SALIR
+            </a>
         </div>
+    </aside>
 
-        <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-200">
-            <div class="p-2 bg-gray-900 flex justify-between items-center px-4">
-                <div class="flex items-center gap-2">
-                    <span class="text-[8px] font-black text-white uppercase italic">Filas:</span>
-                    <select id="pageSize" onchange="loadClients()" class="bg-[#10b981] text-black rounded px-1.5 py-0.5 text-[9px] font-black outline-none cursor-pointer">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="0">ALL</option>
-                    </select>
+    <main class="flex-1 flex flex-col overflow-hidden">
+
+        <header class="bg-black p-3 shadow-2xl border-b-2 border-admin-accent flex items-center justify-between overflow-x-auto no-scrollbar">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="window.location.href='/admin/users'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Users</button>
+                <button onclick="window.location.href='/admin/clients'" class="bg-admin-accent text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg ring-1 ring-white whitespace-nowrap">Clients</button>
+                <button onclick="window.location.href='/admin/companies'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Companies</button>
+                <button onclick="window.location.href='/admin/drivers'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Drivers</button>
+                <button onclick="window.location.href='/admin/bookings'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Bookings</button>
+                <button onclick="window.location.href='/admin/rides'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Rides</button>
+                <button onclick="window.location.href='/admin/payments'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Payments</button>
+            </div>
+
+            <div class="flex gap-2 shrink-0 ml-4">
+                <button onclick="exportData('pdf')" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white transition-all" title="Exportar PDF"><i class="fa-solid fa-file-pdf text-[10px]"></i></button>
+                <button onclick="exportData('excel')" class="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-600/20 text-emerald-500 hover:bg-emerald-600 hover:text-white transition-all" title="Exportar Excel"><i class="fa-solid fa-file-excel text-[10px]"></i></button>
+                <button onclick="window.location.href='/admin'" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black border-2 border-black hover:bg-black hover:text-white transition-all" title="Volver al Panel"><i class="fa-solid fa-arrow-left text-[10px]"></i></button>
+            </div>
+        </header>
+
+        <section class="p-6 overflow-y-auto">
+            <div class="max-w-4xl mx-auto">
+
+                <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-4">
+                    <div class="w-full md:w-1/2">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block italic">Búsqueda de Clientes</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                            <input type="text" id="clientSearch" placeholder="Nombre, email o teléfono..."
+                                class="w-full bg-white border border-slate-200 rounded-lg py-2 pl-9 pr-4 text-[11.5px] focus:ring-1 focus:ring-admin-accent outline-none shadow-sm transition-all italic"
+                                onkeyup="filterClients()">
+                        </div>
+                    </div>
+
+                    <button onclick="window.location.href='/admin/clients/manage'"
+                        class="bg-admin-dark text-white px-4 py-2 rounded-lg font-black text-[9px] hover:bg-admin-accent transition-all shadow-md flex items-center gap-2 uppercase tracking-widest border border-slate-700">
+                        <i class="fa-solid fa-user-plus text-[9px]"></i> NUEVO CLIENTE
+                    </button>
                 </div>
-                <div id="pagination-info" class="text-[9px] font-black text-[#10b981] uppercase tracking-tighter">
-                    REGISTROS: 0 / 0
+
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div class="p-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest italic">Ver:</span>
+                            <select id="pageSize" onchange="renderTable()"
+                                class="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[9px] font-bold outline-none cursor-pointer">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="0">Todos</option>
+                            </select>
+                        </div>
+                        <div id="pagination-info" class="text-[9px] font-black text-admin-accent uppercase italic">
+                            Sincronizando...
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                    <th class="px-5 py-2.5 cursor-pointer hover:text-admin-accent" onclick="sortBy('full_name')">Nombre Completo <i class="fa-solid fa-sort ml-1 opacity-20"></i></th>
+                                    <th class="px-5 py-2.5">Contacto</th>
+                                    <th class="px-5 py-2.5 text-center">Preferencias</th>
+                                    <th class="px-5 py-2.5 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="client-table-body" class="divide-y divide-slate-100 text-[11.5px] font-medium italic">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr class="text-[8px] font-black text-gray-400 uppercase tracking-widest">
-                            <th class="px-3 py-2 cursor-pointer hover:text-black" onclick="sortData('id')">ID <span class="sort-icon">▲▼</span></th>
-                            <th class="px-3 py-2 cursor-pointer hover:text-black" onclick="sortData('full_name')">Nombre Completo <span class="sort-icon">▲▼</span></th>
-                            <th class="px-3 py-2">Contacto</th>
-                            <th class="px-3 py-2 text-center">Preferencias</th>
-                            <th class="px-3 py-2 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="client-table-body" class="divide-y divide-gray-100 text-[10px] italic font-medium">
-                        </tbody>
-                </table>
-            </div>
-        </div>
+        </section>
     </main>
 
-    <script src="/js/admin_client.js"></script>
+    <script src="/js/admin/admin_client.js"></script>
 </body>
+
 </html>
