@@ -1,143 +1,181 @@
 /**
  * @file admin_user.js
- * @description Gestión de la tabla de usuarios con auditoría de red y manejo de redirecciones.
+ * @description Gestión de la tabla de usuarios con búsqueda dinámica y auditoría.
  */
 
-let allUsers = [];
-let sortDirection = true; // true = ASC, false = DESC
+let allUsers = [];      // Datos originales de la API
+let filteredUsers = []; // Datos tras aplicar filtros
+let sortDirection = true; 
 
-/**
- * Inicialización al cargar el DOM
- */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("%c[SYSTEM] Módulo Admin_User iniciado.", "color: #10b981; font-weight: bold;");
+    const adminStyle = "color: #3b82f6; font-weight: bold; background: #1e293b; padding: 3px 8px; border-radius: 5px;";
+    console.log("%c[SYSTEM] Módulo Usuarios Admin iniciado.", adminStyle);
     loadUsers();
 });
 
 /**
- * Carga la lista de usuarios desde la API de Go
+ * Carga la lista de usuarios desde la API
  */
 async function loadUsers() {
-    const paginationInfo = document.getElementById('pagination-info');
-    console.log("%c[API] Solicitando lista a: /api/v1/users", "color: #3b82f6;");
-
+    const info = document.getElementById('pagination-info');
+    
     try {
-        // Usamos redirect: 'follow' pero validaremos el tipo de contenido
         const response = await fetch('/api/v1/users');
         
-        console.log(`[NETWORK] Status: ${response.status} | URL: ${response.url}`);
-
-        // 1. Verificar si la sesión expiró (401)
         if (response.status === 401) {
-            console.warn("%c[AUTH] Sesión expirada o no válida (401). Redirigiendo...", "color: #f59e0b;");
             window.location.href = "/";
             return;
         }
 
-        // 2. Detectar si el servidor nos redirigió a un HTML (Bucle de redirección)
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("text/html")) {
-            console.error("%c[FATAL] El servidor devolvió HTML en lugar de JSON. Probablemente un bucle de redirección en el Middleware.", "color: #ef4444; font-weight: bold;");
-            if (paginationInfo) paginationInfo.textContent = "ERROR: BUCLE DE REDIRECCIÓN";
-            return;
-        }
-
-        if (!response.ok) throw new Error(`Error del servidor: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
         allUsers = await response.json();
-        console.log("%c[DATA] Registros cargados correctamente:", "color: #10b981;", allUsers.length);
+        filteredUsers = [...allUsers]; // Inicialmente son iguales
+        
+        console.log(`[DATA] ${allUsers.length} usuarios cargados.`);
         renderTable();
 
     } catch (error) {
-        console.error("%c[FETCH ERROR] Fallo crítico en la comunicación:", "color: #ef4444;", error);
-        if (paginationInfo) {
-            paginationInfo.textContent = "ERROR DE CONEXIÓN / REDIRECCIÓN";
-            paginationInfo.style.color = "#ef4444";
+        console.error("[FETCH ERROR]", error);
+        if (info) {
+            info.textContent = "ERROR DE CONEXIÓN CON API";
+            info.classList.replace('text-admin-accent', 'text-red-500');
         }
     }
 }
 
 /**
- * Ordena los datos localmente
+ * Filtra los usuarios en tiempo real basándose en el input de búsqueda
+ */
+function filterUsers() {
+    const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+    
+    filteredUsers = allUsers.filter(u => {
+        return (
+            u.username.toLowerCase().includes(searchTerm) ||
+            u.email.toLowerCase().includes(searchTerm) ||
+            u.role.toLowerCase().includes(searchTerm)
+        );
+    });
+
+    renderTable();
+}
+
+/**
+ * Ordena los datos filtrados
  */
 function sortBy(field) {
     sortDirection = !sortDirection;
-    console.log(`[SORT] Ordenando por: ${field} | ASC: ${sortDirection}`);
     
-    allUsers.sort((a, b) => {
+    filteredUsers.sort((a, b) => {
         let valA = (a[field] || "").toString().toLowerCase();
         let valB = (b[field] || "").toString().toLowerCase();
         if (valA < valB) return sortDirection ? -1 : 1;
         if (valA > valB) return sortDirection ? 1 : -1;
         return 0;
     });
+    
     renderTable();
 }
 
 /**
- * Renderiza la tabla de usuarios
+ * Pinta las filas en el tbody
  */
 function renderTable() {
-    const pageSizeSelect = document.getElementById('pageSize');
-    const pageSize = pageSizeSelect ? parseInt(pageSizeSelect.value) : 10;
     const tbody = document.getElementById('user-table-body');
     const info = document.getElementById('pagination-info');
+    const pageSize = parseInt(document.getElementById('pageSize').value) || 0;
     
-    const displayData = (pageSize === 0) ? allUsers : allUsers.slice(0, pageSize);
+    // Aplicar paginación visual
+    const displayData = (pageSize === 0) ? filteredUsers : filteredUsers.slice(0, pageSize);
     
-    if (info) info.textContent = `REGISTROS: ${displayData.length} / ${allUsers.length}`;
+    if (info) {
+        info.textContent = `MOSTRANDO: ${displayData.length} DE ${filteredUsers.length} RESULTADOS`;
+    }
 
-    if (allUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-gray-400 uppercase text-[10px] font-black italic">No hay datos disponibles</td></tr>`;
+    if (filteredUsers.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="p-12 text-center">
+                    <i class="fa-solid fa-user-slash text-4xl text-slate-200 mb-4 block"></i>
+                    <p class="text-slate-400 font-bold uppercase text-xs tracking-widest">No se encontraron usuarios</p>
+                </td>
+            </tr>`;
         return;
     }
 
     tbody.innerHTML = displayData.map(u => {
         const userId = u.id || u.ID;
         return `
-        <tr class="hover:bg-emerald-50/40 transition-colors border-b border-gray-100">
-            <td class="px-3 py-2">
-                <div class="flex flex-col leading-tight">
-                    <span class="font-black text-black uppercase text-[10px] truncate">${u.username}</span>
-                    <span class="text-[8px] text-gray-400 font-bold lowercase truncate italic">${u.email}</span>
+        <tr class="hover:bg-slate-50 transition-all border-b border-slate-100 group">
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-[10px] font-bold border border-slate-200 group-hover:bg-admin-accent group-hover:text-white transition-colors">
+                        ${u.username.substring(0,2).toUpperCase()}
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-700 text-sm">${u.username}</span>
+                        <span class="text-[11px] text-slate-400 font-medium">${u.email}</span>
+                    </div>
                 </div>
             </td>
-            <td class="px-3 py-2 text-center">
-                <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase shadow-sm ${getRoleStyle(u.role)}">
+            <td class="px-6 py-4 text-center">
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${getRoleStyle(u.role)}">
                     ${u.role}
                 </span>
             </td>
-            <td class="px-3 py-2 text-center">
-                <span class="text-[8px] font-black italic ${u.is_active ? 'text-emerald-600' : 'text-red-500'}">
-                    ${u.is_active ? '● ACTIVO' : '○ BLOQUEADO'}
-                </span>
+            <td class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full ${u.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}"></span>
+                    <span class="text-[11px] font-bold ${u.is_active ? 'text-emerald-600' : 'text-red-500'} uppercase">
+                        ${u.is_active ? 'Activo' : 'Bloqueado'}
+                    </span>
+                </div>
             </td>
-            <td class="px-3 py-2 text-right">
-                <button onclick="window.location.href='/admin/users/manage?id=${userId}'" 
-                    class="p-1.5 bg-black text-[#10b981] rounded hover:bg-[#10b981] hover:text-black transition-all active:scale-90">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                        <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                </button>
+            <td class="px-6 py-4 text-right">
+                <div class="flex justify-end gap-2">
+                    <button onclick="window.location.href='/admin/users/manage?id=${userId}'" 
+                        class="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-600 rounded-lg hover:bg-admin-accent hover:text-white transition-all shadow-sm"
+                        title="Editar Usuario">
+                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                    </button>
+                    <button onclick="deleteUser(${userId})" 
+                        class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                        title="Eliminar">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
             </td>
         </tr>`;
     }).join('');
 }
 
 /**
- * Estilos de Tailwind para los roles
+ * Estilos específicos por Rol (Actualizados a Slate/Blue)
  */
 function getRoleStyle(role) {
     const styles = {
-        'admin':   'bg-black text-[#10b981] border border-[#10b981]/30',
-        'driver':  'bg-emerald-100 text-emerald-800',
-        'company': 'bg-slate-800 text-white',
-        'client':  'bg-slate-100 text-slate-500'
+        'admin':   'bg-slate-900 text-white border border-slate-700',
+        'driver':  'bg-emerald-100 text-emerald-700',
+        'company': 'bg-blue-100 text-blue-700',
+        'client':  'bg-slate-100 text-slate-600'
     };
-    return styles[role] || 'bg-gray-100 text-gray-400';
+    return styles[role] || 'bg-gray-100 text-gray-500';
 }
 
+/**
+ * Placeholder para exportación
+ */
 function exportData(type) {
-    console.log(`[EXPORT] Preparando ${type}...`);
-    alert(`Exportando ${allUsers.length} registros a ${type.toUpperCase()}`);
+    alert(`Preparando exportación a ${type.toUpperCase()} de ${filteredUsers.length} registros...`);
+}
+
+/**
+ * Placeholder para borrado
+ */
+async function deleteUser(id) {
+    if(confirm('¿Está seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
+        console.log("Eliminando usuario:", id);
+        // Aquí iría el fetch DELETE /api/v1/users/:id
+    }
 }

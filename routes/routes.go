@@ -43,16 +43,16 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	r.POST("/login", authCtrl.Login)
 	r.GET("/logout", authCtrl.Logout)
 
-	// Semáforo de redirección inicial
+	// Semáforo de redirección inicial tras login
 	r.GET("/dashboard", utils.JWTAuthMiddleware(), authCtrl.RedirectByRole)
 
 	// ---------------------------------------------------------
-	// SECCIÓN ADMIN (Prefijo /admin/ para todo)
+	// SECCIÓN ADMIN (Prefijo /admin/)
 	// ---------------------------------------------------------
 	admin := r.Group("/admin")
 	admin.Use(utils.JWTAuthMiddleware(), utils.RoleMiddleware("admin"))
 	{
-		// 🏠 Inicio Admin (Menú Principal)
+		// 🏠 Inicio Admin
 		admin.GET("/", func(c *gin.Context) {
 			c.File("static/views/admin/admin.html")
 		})
@@ -75,7 +75,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			c.File("static/views/admin/admin_client_crud.html")
 		})
 
-		// 🚗 Otras Entidades (Rutas preparadas bajo /admin/)
+		// 🚗 Rutas Preparadas para futuras vistas
 		admin.GET("/drivers", func(c *gin.Context) { c.String(200, "Vista de Conductores") })
 		admin.GET("/vehicles", func(c *gin.Context) { c.String(200, "Vista de Vehículos") })
 		admin.GET("/companies", func(c *gin.Context) { c.String(200, "Vista de Empresas") })
@@ -105,9 +105,21 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	api := r.Group("/api/v1")
 	api.Use(utils.JWTAuthMiddleware())
 	{
+		// 🆔 Identidad del usuario logueado
 		api.GET("/users/me", userCtrl.GetMe)
+
+		// 👥 CRUD USUARIOS (Completo)
 		api.GET("/users", userCtrl.GetAll)
+		api.POST("/users", userCtrl.POST)
+		api.GET("/users/:id", userCtrl.Get)       // <--- SOLUCIONA EL 404 DE CARGA
+		api.PUT("/users/:id", userCtrl.PUT)       // <--- SOLUCIONA EL 404 DE GUARDAR
+		api.DELETE("/users/:id", userCtrl.DELETE) // <--- SOLUCIONA EL 404 DE BORRADO
+
+		// 💼 CRUD CLIENTES (Preparado)
 		api.GET("/clients", clientCtrl.GetAll)
+		// api.GET("/clients/:id", clientCtrl.Get)
+
+		// 🚗 Endpoints de Datos
 		api.GET("/drivers", driverCtrl.GetAll)
 		api.GET("/vehicles", vehicleCtrl.GetAll)
 		api.GET("/companies", companyCtrl.GetAll)

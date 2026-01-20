@@ -1,55 +1,60 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const userId = params.get('id');
-
-    // Evitar errores de null si los elementos no existen
-    const pageTitle = document.getElementById('page-title');
-    const formSubtitle = document.getElementById('form-subtitle');
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
 
     if (userId) {
-        console.log("Iniciando modo edición para ID:", userId);
-        if(pageTitle) pageTitle.textContent = "EDITAR USUARIO";
-        if(formSubtitle) formSubtitle.textContent = "Actualizar datos";
-        
-        document.getElementById('pass-hint')?.classList.remove('hidden');
-        document.getElementById('btn-delete')?.classList.remove('hidden');
-        
-        loadUserData(userId);
+        console.log("[CRUD] 📝 Modo: MODIFICAR USUARIO (ID:", userId, ")");
+        await setupEditMode(userId);
     } else {
-        console.log("Iniciando modo creación");
-        if(pageTitle) pageTitle.textContent = "NUEVO USUARIO";
-        if(formSubtitle) formSubtitle.textContent = "Crear perfil";
+        console.log("[CRUD] ✨ Modo: NUEVO USUARIO");
+        document.getElementById('page-title').textContent = "Nuevo Usuario";
+        document.getElementById('btn-save').textContent = "Crear Usuario";
     }
 
-    document.getElementById('crud-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveUser(userId);
-    });
-
-    document.getElementById('btn-delete')?.addEventListener('click', () => {
-        if(confirm("¿Eliminar usuario?")) deleteUser(userId);
-    });
+    // Listener del Formulario
+    document.getElementById('crud-form').addEventListener('submit', handleFormSubmit);
 });
 
-async function loadUserData(id) {
+/**
+ * Prepara el formulario para editar
+ */
+async function setupEditMode(id) {
     try {
-        const res = await fetch(`/api/v1/users/${id}`);
-        const data = await res.json();
-        console.log("Datos cargados:", data);
+        const response = await fetch(`/api/v1/users/${id}`);
+        if (!response.ok) throw new Error("No se pudo obtener el usuario");
         
-        document.getElementById('username').value = data.username;
-        document.getElementById('email').value = data.email;
-        document.getElementById('role').value = data.role;
-        document.getElementById('is_active').checked = data.is_active;
-    } catch (e) {
-        console.error("Error cargando usuario:", e);
+        const u = await response.json();
+
+        // Llenar campos
+        document.getElementById('userId').value = u.id || u.ID;
+        document.getElementById('username').value = u.username;
+        document.getElementById('email').value = u.email;
+        document.getElementById('role').value = u.role;
+        document.getElementById('is_active').checked = u.is_active;
+
+        // Cambiar textos visuales
+        document.getElementById('page-title').textContent = "Modificar Usuario";
+        document.getElementById('btn-save').textContent = "Guardar Cambios";
+        document.getElementById('pass-hint').classList.remove('hidden');
+        document.getElementById('btn-delete-trigger').classList.remove('hidden');
+        
+        // Configurar modal de borrado
+        document.getElementById('confirm-user-name').textContent = u.username;
+        document.getElementById('btn-delete-trigger').onclick = () => openDeleteModal(u);
+
+    } catch (err) {
+        alert("Error cargando datos: " + err.message);
     }
 }
 
-async function saveUser(id) {
-    console.log("Enviando formulario...");
+/**
+ * Envío de datos (POST para crear / PUT para modificar)
+ */
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const userId = document.getElementById('userId').value;
     
-    const userData = {
+    const payload = {
         username: document.getElementById('username').value,
         email: document.getElementById('email').value,
         role: document.getElementById('role').value,
@@ -57,30 +62,57 @@ async function saveUser(id) {
     };
 
     const password = document.getElementById('password').value;
-    if (password) userData.password = password;
+    if (password) payload.password = password;
 
-    const url = id ? `/api/v1/users/${id}` : '/api/v1/users';
-    const method = id ? 'PUT' : 'POST';
+    const method = userId ? 'PUT' : 'POST';
+    const url = userId ? `/api/v1/users/${userId}` : '/api/v1/users';
 
     try {
         const res = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
+            body: JSON.stringify(payload)
         });
 
-        const result = await res.json();
-
         if (res.ok) {
-            console.log("Respuesta Exitosa:", result);
-            alert("✅ ¡Guardado con éxito!");
-            window.location.href = "/dashboard/users";
+            alert(userId ? "✅ Usuario actualizado" : "✅ Usuario creado");
+            window.location.href = "/admin/users";
         } else {
-            console.error("Respuesta Error:", result);
-            alert("❌ Error: " + (result.error || "No se pudo guardar"));
+            const err = await res.json();
+            alert("Error: " + err.error);
         }
-    } catch (e) {
-        console.error("Error de red:", e);
-        alert("❌ Error crítico de conexión");
+    } catch (err) {
+        alert("Fallo de red");
+    }
+}
+
+// LÓGICA DE BORRADO
+function openDeleteModal() {
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+}
+
+async function confirmFinalDelete() {
+    const userId = document.getElementById('userId').value;
+    const inputUser = document.getElementById('confirm-username').value;
+    const inputEmail = document.getElementById('confirm-email').value;
+    const inputKey = document.getElementById('confirm-key').value;
+
+    const realUser = document.getElementById('username').value;
+    const realEmail = document.getElementById('email').value;
+
+    if (inputUser === realUser && inputEmail === realEmail && inputKey.toUpperCase() === 'ELIMINAR') {
+        try {
+            const res = await fetch(`/api/v1/users/${userId}`, { method: 'DELETE' });
+            if (res.ok) {
+                alert("🗑️ Usuario eliminado correctamente");
+                window.location.href = "/admin/users";
+            }
+        } catch (err) { alert("Error al borrar"); }
+    } else {
+        alert("❌ Los datos de confirmación no coinciden.");
     }
 }
