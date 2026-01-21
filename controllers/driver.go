@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"transfers/models"
-	"transfers/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -17,7 +15,7 @@ type DriverController struct {
 // GET /api/v1/drivers - Listar todos los conductores
 func (ctrl *DriverController) GetAll(c *gin.Context) {
 	var items []models.Driver
-	// Preload de User para login y Company para saber a qué flota pertenece
+	// Preload de User y Company para mostrar nombres en la tabla
 	if err := ctrl.DB.Preload("User").Preload("Company").Find(&items).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al recuperar conductores"})
 		return
@@ -25,7 +23,7 @@ func (ctrl *DriverController) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
-// GET /api/v1/drivers/:id - Obtener un conductor específico
+// GET /api/v1/drivers/:id - Obtener detalle
 func (ctrl *DriverController) Get(c *gin.Context) {
 	var item models.Driver
 	if err := ctrl.DB.Preload("User").Preload("Company").First(&item, c.Param("id")).Error; err != nil {
@@ -35,55 +33,26 @@ func (ctrl *DriverController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
-// POST /api/v1/drivers - Crear conductor + Crear acceso de usuario
+// POST /api/v1/drivers - Crear conductor vinculado a Usuario y Empresa
 func (ctrl *DriverController) POST(c *gin.Context) {
 	var item models.Driver
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos del formulario inválidos: " + err.Error()})
 		return
 	}
 
-	tx := ctrl.DB.Begin()
-
-	// 1. Verificar si el usuario ya existe por email
-	var existingUser models.User
-	err := tx.Where("email = ?", item.Email).First(&existingUser).Error
-
-	var targetUserID uint
-
-	if err == nil {
-		targetUserID = existingUser.ID
-		fmt.Println("[DRIVER] Usando usuario existente ID:", targetUserID)
-	} else {
-		// Crear usuario nuevo (Password inicial = Teléfono)
-		hashedPassword, _ := utils.GenerateHashPassword(item.Phone)
-		newUser := models.User{
-			Username:     item.Email,
-			Email:        item.Email,
-			PasswordHash: hashedPassword,
-			Role:         "driver",
-			IsActive:     true,
-		}
-
-		if err := tx.Create(&newUser).Error; err != nil {
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear credenciales"})
-			return
-		}
-		targetUserID = newUser.ID
-	}
-
-	// 2. Vincular y crear ficha de conductor
-	item.ID = 0
-	item.UserID = targetUserID
-
-	if err := tx.Create(&item).Error; err != nil {
-		tx.Rollback()
-		c.JSON(http.StatusConflict, gin.H{"error": "Este conductor ya está registrado en el sistema"})
+	// Validación de llaves foráneas manual (opcional pero recomendada)
+	if item.UserID == 0 || item.CompanyID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Debe seleccionar un Usuario y una Empresa obligatoriamente"})
 		return
 	}
 
-	tx.Commit()
+	if err := ctrl.DB.Create(&item).Error; err != nil {
+		// Error común: el UserID ya está asignado a otro Driver (unique index)
+		c.JSON(http.StatusConflict, gin.H{"error": "El usuario seleccionado ya tiene una ficha de conductor activa"})
+		return
+	}
+
 	c.JSON(http.StatusCreated, item)
 }
 
@@ -102,24 +71,21 @@ func (ctrl *DriverController) PUT(c *gin.Context) {
 		return
 	}
 
-	// Actualizar solo la tabla drivers
+	// Forzamos el ID de la URL para evitar que cambie el ID primario
 	if err := ctrl.DB.Save(&item).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar la ficha"})
 		return
 	}
 
 	c.JSON(http.StatusOK, item)
 }
 
-// DELETE /api/v1/drivers/:id - Eliminar conductor
+// DELETE /api/v1/drivers/:id - Borrado lógico
 func (ctrl *DriverController) DELETE(c *gin.Context) {
 	id := c.Param("id")
-
-	// Borrado lógico del conductor
 	if err := ctrl.DB.Delete(&models.Driver{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo eliminar el registro"})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Conductor eliminado correctamente"})
+	c.JSON(http.StatusOK, gin.H{"message": "Conductor dado de baja"})
 }

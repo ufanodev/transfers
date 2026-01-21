@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TakeUs Admin | Gestión de Conductor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { admin: { dark: '#1e293b', accent: '#3b82f6', success: '#10b981' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans text-[13px]">
+
+    <aside class="w-64 bg-admin-dark text-white flex flex-col shadow-2xl shrink-0 border-r border-slate-700">
+        <div class="p-6 text-center border-b border-slate-700">
+            <h2 onclick="window.location.href='/admin'" class="text-xl font-black italic tracking-tighter uppercase cursor-pointer text-white">Take<span class="text-admin-accent">Us</span></h2>
+        </div>
+        <nav class="flex-1 px-4 py-6">
+            <ul class="space-y-1">
+                <li><a href="/admin/drivers" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold shadow-lg"><i class="fa-solid fa-id-card"></i> Conductores</a></li>
+                <li><a href="/admin/companies" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all"><i class="fa-solid fa-building"></i> Empresas</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-black p-3 shadow-2xl border-b-2 border-admin-accent flex items-center justify-between">
+            <button onclick="window.location.href='/admin/drivers'" class="bg-admin-accent text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-white hover:text-admin-accent transition-all">Regresar</button>
+            <h1 class="text-white font-black uppercase italic text-xs tracking-widest">Expediente de Conductor</h1>
+            <button onclick="window.location.href='/admin'" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black border border-black hover:bg-admin-accent hover:text-white transition-all"><i class="fa-solid fa-home text-[10px]"></i></button>
+        </header>
+
+        <section class="p-8 overflow-y-auto flex justify-center">
+            <div class="w-full max-w-2xl">
+                <h2 id="page-title" class="text-lg font-black text-slate-800 uppercase italic mb-6 text-center underline decoration-admin-accent decoration-4 underline-offset-8">Alta de Conductor</h2>
+                
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+                    <form id="crud-form" class="p-8 space-y-6">
+                        <input type="hidden" id="driverId">
+                        
+                        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase italic">1. Cuenta de Usuario (Login)</label>
+                                <select id="user_id" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-admin-accent">
+                                    <option value="">Cargando usuarios...</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase italic">2. Empresa Asignada</label>
+                                <select id="company_id" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-admin-accent">
+                                    <option value="">Cargando empresas...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Nombre Completo del Conductor</label>
+                                <input type="text" id="full_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold uppercase focus:ring-1 focus:ring-admin-accent outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Email Profesional</label>
+                                    <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold focus:ring-1 focus:ring-admin-accent outline-none">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Teléfono Móvil</label>
+                                    <input type="text" id="phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold focus:ring-1 focus:ring-admin-accent outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 border-t border-slate-100 pt-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Nº Licencia</label>
+                                <input type="text" id="license_number" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold uppercase focus:ring-1 focus:ring-admin-accent outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Vencimiento</label>
+                                <input type="date" id="license_expiry_date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold focus:ring-1 focus:ring-admin-accent outline-none">
+                            </div>
+                            <div class="space-y-1 flex flex-col">
+                                <label class="text-[9px] font-black text-slate-500 uppercase ml-1 mb-2">Estado Activo</label>
+                                <label class="relative inline-flex items-center cursor-pointer ml-1">
+                                    <input type="checkbox" id="is_available" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-admin-success"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <button type="submit" id="btn-save" class="w-full bg-admin-dark text-white py-3.5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-admin-accent transition-all shadow-xl active:scale-95">Finalizar Registro</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/admin/admin_driver_crud.js"></script>
+</body>
+</html>
