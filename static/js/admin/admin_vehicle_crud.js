@@ -1,13 +1,13 @@
 /**
  * @file admin_vehicle_crud.js
- * @description Gestión de creación y actualización de vehículos de la flota.
- * Vinculación con empresas propietarias mediante API.
+ * @description Lógica de gestión para el alta y modificación de vehículos de la flota.
+ * @dependencies Requiere endpoints de /api/v1/companies y /api/v1/vehicles.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("%c[VEHICLE-CRUD] Inicializando sistema de gestión de flota", "color: #3b82f6; font-weight: bold;");
 
-    // 1. Cargar dependencias necesarias
+    // 1. Cargar empresas para el selector
     await loadCompaniesForSelection();
 
     // 2. Determinar modo (Crear o Editar)
@@ -19,14 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. Listener del formulario
-    const form = document.getElementById('crud-form');
-    if (form) {
-        form.addEventListener('submit', handleFormSubmit);
-    }
+    document.getElementById('crud-form').addEventListener('submit', handleFormSubmit);
 });
 
 /**
- * Obtiene todas las empresas para el selector
+ * Carga todas las empresas disponibles para asignar el vehículo
  */
 async function loadCompaniesForSelection() {
     try {
@@ -47,14 +44,15 @@ async function loadCompaniesForSelection() {
 }
 
 /**
- * Carga los datos del vehículo para modo edición
+ * Prepara el formulario con datos existentes del vehículo
  */
 async function setupEditMode(id) {
     try {
         const res = await fetch(`/api/v1/vehicles/${id}`);
-        if (!res.ok) throw new Error("No se pudo obtener el vehículo");
+        if (!res.ok) throw new Error("Vehículo no encontrado");
         const v = await res.json();
 
+        // Rellenar campos
         document.getElementById('vehicleId').value = v.id || v.ID;
         document.getElementById('company_id').value = v.company_id;
         document.getElementById('make').value = v.make;
@@ -72,19 +70,20 @@ async function setupEditMode(id) {
         document.getElementById('base_fare').value = v.base_fare;
         document.getElementById('is_active').checked = v.is_active;
 
-        // UI Update
-        document.getElementById('page-title').textContent = "Modificar Expediente Vehículo";
+        // Cambiar interfaz
+        document.getElementById('page-title').textContent = "Modificar Vehículo";
         const btn = document.getElementById('btn-save');
         btn.textContent = "ACTUALIZAR FICHA TÉCNICA";
         btn.classList.replace('bg-admin-dark', 'bg-admin-accent');
 
     } catch (e) {
         console.error("Error en modo edición:", e);
+        alert("No se pudieron cargar los datos del vehículo.");
     }
 }
 
 /**
- * Maneja el envío del formulario (POST o PUT)
+ * Gestiona el envío de datos (POST o PUT)
  */
 async function handleFormSubmit(e) {
     e.preventDefault();
@@ -123,6 +122,6 @@ async function handleFormSubmit(e) {
             alert("Error: " + (err.error || "No se pudo procesar la solicitud"));
         }
     } catch (e) {
-        alert("Error crítico de comunicación con el servidor");
+        alert("Error de conexión con el servidor");
     }
 }

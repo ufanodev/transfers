@@ -28,7 +28,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	vehicleCtrl := &controllers.VehicleController{DB: db}
 	rideCtrl := &controllers.RideController{DB: db}
 	paymentCtrl := &controllers.PaymentController{DB: db}
-	bookingCtrl := &controllers.BookingController{DB: db} // Nuevo controlador
+	bookingCtrl := &controllers.BookingController{DB: db}
 
 	// ---------------------------------------------------------
 	// RUTAS PÚBLICAS
@@ -66,9 +66,12 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		admin.GET("/vehicles", func(c *gin.Context) { c.File("static/views/admin/admin_vehicle.html") })
 		admin.GET("/vehicles/manage", func(c *gin.Context) { c.File("static/views/admin/admin_vehicle_crud.html") })
 
-		// Reservas y Logística
+		// Reservas y Logística (Rides)
 		admin.GET("/bookings", func(c *gin.Context) { c.File("static/views/admin/admin_booking.html") })
 		admin.GET("/rides", func(c *gin.Context) { c.File("static/views/admin/admin_ride.html") })
+		admin.GET("/rides/manage", func(c *gin.Context) { c.File("static/views/admin/admin_ride_crud.html") })
+
+		// Pagos
 		admin.GET("/payments", func(c *gin.Context) { c.File("static/views/admin/admin_payment.html") })
 	}
 
@@ -113,18 +116,22 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		api.PUT("/vehicles/:id", vehicleCtrl.PUT)
 		api.DELETE("/vehicles/:id", vehicleCtrl.DELETE)
 
-		// Gestión de Viajes y Pagos
+		// Gestión de Viajes (Rides)
 		api.GET("/rides", rideCtrl.GetAll)
 		api.POST("/rides", rideCtrl.POST)
+		api.GET("/rides/:id", rideCtrl.Get)
 		api.PUT("/rides/:id", rideCtrl.PUT)
+		api.DELETE("/rides/:id", rideCtrl.DELETE)
 
-		api.GET("/payments", paymentCtrl.GetAll)
-		api.POST("/payments", paymentCtrl.POST)
-
+		// Gestión de Reservas (Bookings)
 		api.GET("/bookings", bookingCtrl.GetAll)
 		api.POST("/bookings", bookingCtrl.POST)
 		api.GET("/bookings/:id", bookingCtrl.Get)
 		api.PUT("/bookings/:id", bookingCtrl.PUT)
+
+		// Gestión de Pagos
+		api.GET("/payments", paymentCtrl.GetAll)
+		api.POST("/payments", paymentCtrl.POST)
 	}
 
 	return r
