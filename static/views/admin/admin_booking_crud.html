@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TakeUs Admin | Ficha de Reserva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { admin: { dark: '#1e293b', accent: '#3b82f6', success: '#10b981' } } } }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { font-size: 0.85rem; }
+    </style>
+</head>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-64 bg-admin-dark text-white flex flex-col shadow-2xl overflow-y-auto shrink-0 border-r border-slate-700">
+        <div class="p-6 text-center border-b border-slate-700">
+            <h2 onclick="window.location.href='/admin'" class="text-xl font-black italic tracking-tighter uppercase cursor-pointer">Take<span class="text-admin-accent">Us</span> <span class="text-[10px] bg-admin-accent px-1 rounded text-white ml-1">ADMIN</span></h2>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-6">
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Logística</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/bookings" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold shadow-lg transition-all text-[11.5px]"><i class="fa-solid fa-calendar-check"></i> Reservas</a></li>
+                    <li><a href="/admin/rides" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-route"></i> Viajes (Rides)</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Gestión Flota</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/drivers" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-id-card"></i> Conductores</a></li>
+                    <li><a href="/admin/vehicles" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-car"></i> Vehículos</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="p-4 bg-slate-900 mt-auto">
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-red-500/20 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all text-xs"><i class="fa-solid fa-power-off"></i> SALIR</a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-black p-3 shadow-2xl border-b-2 border-admin-accent flex items-center justify-between">
+            <div class="flex gap-2">
+                <button onclick="window.location.href='/admin/bookings'" class="bg-admin-accent text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-white hover:text-admin-accent transition-all">Monitor de Reservas</button>
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <button onclick="window.location.href='/admin'" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black border-2 border-black hover:bg-admin-accent hover:text-white transition-all"><i class="fa-solid fa-arrow-left text-[10px]"></i></button>
+            </div>
+        </header>
+
+        <section class="p-8 overflow-y-auto flex justify-center">
+            <div class="w-full max-w-4xl">
+                <h2 id="page-title" class="text-lg font-black text-slate-800 uppercase italic mb-6 text-center underline decoration-admin-accent decoration-4 underline-offset-8 italic">Nueva Reserva de Servicio</h2>
+                
+                <form id="crud-form" class="bg-white rounded-3xl shadow-2xl border border-slate-200 p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input type="hidden" id="bookingId">
+                    
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <label class="text-[9px] font-black text-slate-400 uppercase italic">Vincular Titular de Cuenta</label>
+                            <select id="client_id" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold outline-none focus:ring-1 focus:ring-admin-accent mt-1"></select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Nombre Pasajero (Cartel)</label>
+                            <input type="text" id="client_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-admin-accent font-bold uppercase outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Teléfono Contacto</label>
+                            <input type="text" id="client_phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-1 focus:ring-admin-accent font-bold outline-none">
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2 bg-slate-100/50 p-3 rounded-2xl border border-slate-200">
+                            <div class="space-y-1 text-center">
+                                <label class="text-[8px] font-black text-slate-500 uppercase">PAX</label>
+                                <select id="pax" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-black outline-none">
+                                    <option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1 text-center">
+                                <label class="text-[8px] font-black text-slate-500 uppercase">Maletas</label>
+                                <select id="maletas" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-black outline-none">
+                                    <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1 flex flex-col items-center">
+                                <label class="text-[8px] font-black text-slate-500 uppercase mb-1">Mascota</label>
+                                <input type="checkbox" id="animal" class="w-5 h-5 accent-admin-accent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase">Fecha</label>
+                                <input type="date" id="scheduled_date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase">Hora</label>
+                                <input type="time" id="scheduled_time" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold outline-none">
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-blue-500 uppercase ml-1 italic">Recogida (Origin)</label>
+                            <input type="text" id="origin_address" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold italic outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-emerald-500 uppercase ml-1 italic">Destino (Destination)</label>
+                            <input type="text" id="dest_address" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold italic outline-none">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Estado</label>
+                            <select id="status" class="w-full bg-slate-900 text-white border border-slate-700 rounded-xl px-4 py-2 text-xs font-black uppercase outline-none">
+                                <option value="pending">PENDIENTE</option>
+                                <option value="confirmed">CONFIRMADA</option>
+                                <option value="cancelled">CANCELADA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Observaciones / Notas (Max 255)</label>
+                        <textarea id="notes" maxlength="255" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[11px] font-medium italic outline-none" rows="2" placeholder="Silla de bebé, vuelo, puerta de terminal..."></textarea>
+                    </div>
+
+                    <div class="md:col-span-2 pt-4">
+                        <button type="submit" id="btn-save" class="w-full bg-admin-dark text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-admin-accent transition-all shadow-xl active:scale-95">
+                            Sincronizar Reserva en Sistema
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script src="/js/admin/admin_booking_crud.js"></script>
+</body>
+</html>

@@ -66,8 +66,12 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		admin.GET("/vehicles", func(c *gin.Context) { c.File("static/views/admin/admin_vehicle.html") })
 		admin.GET("/vehicles/manage", func(c *gin.Context) { c.File("static/views/admin/admin_vehicle_crud.html") })
 
-		// Reservas y Logística (Rides)
+		// Reservas (Bookings)
 		admin.GET("/bookings", func(c *gin.Context) { c.File("static/views/admin/admin_booking.html") })
+		// AÑADIDA RUTA DE GESTIÓN DE RESERVAS
+		admin.GET("/bookings/manage", func(c *gin.Context) { c.File("static/views/admin/admin_booking_crud.html") })
+
+		// Logística (Rides)
 		admin.GET("/rides", func(c *gin.Context) { c.File("static/views/admin/admin_ride.html") })
 		admin.GET("/rides/manage", func(c *gin.Context) { c.File("static/views/admin/admin_ride_crud.html") })
 
@@ -128,6 +132,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		api.POST("/bookings", bookingCtrl.POST)
 		api.GET("/bookings/:id", bookingCtrl.Get)
 		api.PUT("/bookings/:id", bookingCtrl.PUT)
+		api.DELETE("/bookings/:id", bookingCtrl.DELETE) // Añadido para permitir cancelación
 
 		// Gestión de Pagos
 		api.GET("/payments", paymentCtrl.GetAll)
