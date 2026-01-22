@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TakeUs Admin | Auditoría de Eventos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { admin: { dark: '#1e293b', accent: '#3b82f6', success: '#10b981' } } } }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { font-size: 0.85rem; }
+    </style>
+</head>
+<body class="bg-slate-50 flex h-screen overflow-hidden font-sans">
+
+    <aside class="w-64 bg-admin-dark text-white flex flex-col shadow-2xl overflow-y-auto shrink-0 border-r border-slate-700">
+        <div class="p-6 text-center border-b border-slate-700">
+            <h2 onclick="window.location.href='/admin'" class="text-xl font-black italic tracking-tighter uppercase cursor-pointer">Take<span class="text-admin-accent">Us</span> <span class="text-[10px] bg-admin-accent px-1 rounded text-white ml-1">ADMIN</span></h2>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-6">
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Gestión de Sistema</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/users" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                    <li><a href="/admin/clients" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-address-book"></i> Clientes</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Logística y Auditoría</h3>
+                <ul class="space-y-1">
+                    <li><a href="/admin/bookings" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-calendar-check"></i> Reservas</a></li>
+                    <li><a href="/admin/events" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold shadow-lg transition-all text-[11.5px]"><i class="fa-solid fa-clock-rotate-left"></i> Eventos (Log)</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="p-4 bg-slate-900 mt-auto">
+            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-red-500/20 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all text-xs italic"><i class="fa-solid fa-power-off"></i> SALIR</a>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-black p-3 shadow-2xl border-b-2 border-admin-accent flex items-center justify-between overflow-x-auto no-scrollbar">
+            <div class="flex gap-2">
+                <button onclick="window.location.href='/admin/bookings'" class="bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Reservas</button>
+                <button onclick="window.location.href='/admin/events'" class="bg-admin-accent text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg ring-1 ring-white whitespace-nowrap">Auditoría Eventos</button>
+            </div>
+
+            <div class="flex gap-2 shrink-0 ml-4">
+                <button onclick="exportData('pdf')" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white transition-all" title="Exportar PDF"><i class="fa-solid fa-file-pdf text-[10px]"></i></button>
+                <button onclick="exportData('excel')" class="w-7 h-7 flex items-center justify-center rounded-full bg-emerald-600/20 text-emerald-500 hover:bg-emerald-600 hover:text-white transition-all" title="Exportar Excel"><i class="fa-solid fa-file-excel text-[10px]"></i></button>
+                <button onclick="window.location.href='/admin'" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black border-2 border-black hover:bg-black hover:text-white transition-all" title="Volver al Panel"><i class="fa-solid fa-arrow-left text-[10px]"></i></button>
+            </div>
+        </header>
+
+        <section class="p-6 overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex justify-between items-end mb-4">
+                    <div>
+                        <h2 class="text-lg font-black text-slate-800 uppercase italic tracking-tighter italic">Línea de Tiempo del Sistema</h2>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase italic tracking-widest">Historial de cambios inmutables</p>
+                    </div>
+                    <button onclick="window.location.href='/admin/events/manage'" class="bg-admin-dark text-white px-4 py-2 rounded-lg font-black text-[9px] hover:bg-admin-accent transition-all shadow-md flex items-center gap-2 uppercase tracking-widest border border-slate-700">
+                        <i class="fa-solid fa-pen-nib text-[9px]"></i> NUEVA NOTA MANUAL
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            <tr>
+                                <th class="px-5 py-3">Timestamp</th>
+                                <th class="px-5 py-3">Reserva</th>
+                                <th class="px-5 py-3">Evento</th>
+                                <th class="px-5 py-3">Descripción / Detalles</th>
+                                <th class="px-5 py-3 text-right">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="event-table-body" class="divide-y divide-slate-100 text-[11px] font-medium italic">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="/js/admin/admin_booking_event.js"></script>
+</body>
+</html>

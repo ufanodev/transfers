@@ -5,14 +5,14 @@ import (
 )
 
 type BookingEvent struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	BookingID uint      `gorm:"not null" json:"booking_id"`
-	EventType string    `gorm:"type:varchar(50)" json:"event_type"` // status_change, driver_assigned, etc.
-	OldStatus string    `gorm:"type:varchar(20)" json:"old_status"`
-	NewStatus string    `gorm:"type:varchar(20)" json:"new_status"`
-	ActorID   uint      `json:"actor_id"`                 // ID del usuario que disparó el evento
-	Payload   string    `gorm:"type:json" json:"payload"` // Datos extra (coordenadas, motivos)
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	BookingID   uint      `gorm:"not null;index" json:"booking_id"`
+	EventType   string    `gorm:"type:varchar(50);not null" json:"event_type"` // created, status_change, driver_assigned, manual_note
+	Description string    `gorm:"type:text" json:"description"`
+	OldValue    string    `gorm:"type:varchar(100)" json:"old_value"`
+	NewValue    string    `gorm:"type:varchar(100)" json:"new_value"`
+	CreatedBy   string    `gorm:"type:varchar(100)" json:"created_by"` // Nombre del admin o sistema
+	CreatedAt   time.Time `json:"created_at"`
 
 	// Relación
 	Booking Booking `gorm:"foreignKey:BookingID" json:"-"`

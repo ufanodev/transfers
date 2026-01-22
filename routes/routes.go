@@ -29,6 +29,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	rideCtrl := &controllers.RideController{DB: db}
 	paymentCtrl := &controllers.PaymentController{DB: db}
 	bookingCtrl := &controllers.BookingController{DB: db}
+	eventCtrl := &controllers.BookingEventController{DB: db} // Nuevo controlador de eventos
 
 	// ---------------------------------------------------------
 	// RUTAS PÚBLICAS
@@ -68,12 +69,15 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// Reservas (Bookings)
 		admin.GET("/bookings", func(c *gin.Context) { c.File("static/views/admin/admin_booking.html") })
-		// AÑADIDA RUTA DE GESTIÓN DE RESERVAS
 		admin.GET("/bookings/manage", func(c *gin.Context) { c.File("static/views/admin/admin_booking_crud.html") })
 
 		// Logística (Rides)
 		admin.GET("/rides", func(c *gin.Context) { c.File("static/views/admin/admin_ride.html") })
 		admin.GET("/rides/manage", func(c *gin.Context) { c.File("static/views/admin/admin_ride_crud.html") })
+
+		// Auditoría (Events)
+		admin.GET("/events", func(c *gin.Context) { c.File("static/views/admin/admin_booking_event.html") })
+		admin.GET("/events/manage", func(c *gin.Context) { c.File("static/views/admin/admin_booking_event_crud.html") })
 
 		// Pagos
 		admin.GET("/payments", func(c *gin.Context) { c.File("static/views/admin/admin_payment.html") })
@@ -132,7 +136,12 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		api.POST("/bookings", bookingCtrl.POST)
 		api.GET("/bookings/:id", bookingCtrl.Get)
 		api.PUT("/bookings/:id", bookingCtrl.PUT)
-		api.DELETE("/bookings/:id", bookingCtrl.DELETE) // Añadido para permitir cancelación
+		api.DELETE("/bookings/:id", bookingCtrl.DELETE)
+
+		// Auditoría de Eventos (Booking Events)
+		api.GET("/events", eventCtrl.GetAll)
+		api.POST("/events", eventCtrl.POST)
+		api.GET("/events/:id", eventCtrl.Get)
 
 		// Gestión de Pagos
 		api.GET("/payments", paymentCtrl.GetAll)
