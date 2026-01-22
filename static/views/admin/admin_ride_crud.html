@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeUs Admin | Gestión de Carrera (Ride)</title>
+    <title>TakeUs Admin | Despacho de Carrera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -16,7 +16,7 @@
 
     <aside class="w-64 bg-admin-dark text-white flex flex-col shadow-2xl shrink-0 border-r border-slate-700">
         <div class="p-6 text-center border-b border-slate-700">
-            <h2 onclick="window.location.href='/admin'" class="text-xl font-black italic tracking-tighter uppercase cursor-pointer text-white">Take<span class="text-admin-accent">Us</span></h2>
+            <h2 onclick="window.location.href='/admin'" class="text-xl font-black italic tracking-tighter uppercase cursor-pointer">Take<span class="text-admin-accent">Us</span></h2>
         </div>
         <nav class="flex-1 px-4 py-6">
             <ul class="space-y-1">
@@ -29,7 +29,7 @@
     <main class="flex-1 flex flex-col overflow-hidden">
         <header class="bg-black p-3 shadow-2xl border-b-2 border-admin-accent flex items-center justify-between">
             <button onclick="window.location.href='/admin/rides'" class="bg-admin-accent text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-white hover:text-admin-accent transition-all">Lista de Viajes</button>
-            <h1 class="text-white font-black uppercase italic text-xs tracking-widest">Despacho de Carreras</h1>
+            <h1 class="text-white font-black uppercase italic text-xs tracking-widest" id="page-title">Nuevo Despacho Logístico</h1>
             <button onclick="window.location.href='/admin'" class="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black border border-black hover:bg-admin-accent hover:text-white transition-all"><i class="fa-solid fa-home text-[10px]"></i></button>
         </header>
 
@@ -38,113 +38,124 @@
                 <input type="hidden" id="rideId">
 
                 <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden h-fit">
-                    <div class="bg-slate-900 p-4 text-white text-[10px] font-black uppercase tracking-widest">1. Identidad del Servicio</div>
+                    <div class="bg-slate-900 p-4 text-white text-[10px] font-black uppercase tracking-widest">1. Selección de Reserva y Flota</div>
                     <div class="p-6 space-y-4">
                         <div class="space-y-1">
-                            <label class="text-[9px] font-black text-slate-400 uppercase italic">Vincular Reserva (Booking ID)</label>
-                            <select id="booking_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold focus:ring-1 focus:ring-admin-accent outline-none"></select>
+                            <label class="text-[9px] font-black text-slate-400 uppercase italic">Vincular Reserva Pendiente</label>
+                            <select id="booking_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold focus:ring-1 focus:ring-admin-accent outline-none" onchange="autoFillFromBooking(this.value)"></select>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase italic">Conductor</label>
+                                <label class="text-[9px] font-black text-slate-400 uppercase italic">Conductor Asignado</label>
                                 <select id="driver_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold outline-none"></select>
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase italic">Vehículo</label>
+                                <label class="text-[9px] font-black text-slate-400 uppercase italic">Vehículo Asignado</label>
                                 <select id="vehicle_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold outline-none"></select>
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[9px] font-black text-slate-400 uppercase italic">Voucher Number / Ref Interna</label>
-                            <input type="text" id="voucher_number" placeholder="Ej: V-9988" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold uppercase focus:ring-1 focus:ring-admin-accent outline-none">
+                            <label class="text-[9px] font-black text-slate-400 uppercase italic">Referencia / Voucher Externo</label>
+                            <input type="text" id="voucher_number" placeholder="Ej: B-10522" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold uppercase outline-none">
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden h-fit">
-                    <div class="bg-slate-900 p-4 text-white text-[10px] font-black uppercase tracking-widest">2. Geolocalización (GPS)</div>
+                    <div class="bg-slate-900 p-4 text-white text-[10px] font-black uppercase tracking-widest">2. Información del Pasajero</div>
                     <div class="p-6 space-y-4">
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-black text-slate-500 uppercase">Dirección de Recogida (Origin)</label>
-                            <input type="text" id="origin_address" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold focus:ring-1 focus:ring-admin-accent outline-none">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Nombre Pax</label>
+                                <input type="text" id="client_name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold uppercase outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Teléfono</label>
+                                <input type="text" id="client_phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold outline-none">
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="number" id="origin_lat" step="any" placeholder="Latitud Origen" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-[10px]">
-                            <input type="number" id="origin_lng" step="any" placeholder="Longitud Origen" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-[10px]">
+                        <div class="grid grid-cols-3 gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                            <div class="space-y-1 text-center">
+                                <label class="text-[9px] font-black text-slate-500 uppercase">Pax</label>
+                                <input type="number" id="pax" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 font-black text-center outline-none">
+                            </div>
+                            <div class="space-y-1 text-center">
+                                <label class="text-[9px] font-black text-slate-500 uppercase">Maletas</label>
+                                <input type="number" id="maletas" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 font-black text-center outline-none">
+                            </div>
+                            <div class="flex flex-col items-center justify-center pt-1">
+                                <label class="text-[9px] font-black text-slate-500 uppercase mb-1">Animal</label>
+                                <input type="checkbox" id="animal" class="w-5 h-5 accent-admin-accent">
+                            </div>
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-black text-slate-500 uppercase">Dirección de Destino (Destination)</label>
-                            <input type="text" id="destination_address" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold focus:ring-1 focus:ring-admin-accent outline-none">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden h-fit lg:col-span-2">
+                    <div class="bg-slate-800 p-4 text-white text-[10px] font-black uppercase tracking-widest">3. Ruta y Geolocalización</div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-blue-500 uppercase italic ml-1">Origen (Pickup Address)</label>
+                                <input type="text" id="origin_address" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold italic outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="origin_lat" step="any" placeholder="Latitud Origen" class="bg-slate-50 border rounded-lg px-3 py-1 text-[10px]">
+                                <input type="number" id="origin_lng" step="any" placeholder="Longitud Origen" class="bg-slate-50 border rounded-lg px-3 py-1 text-[10px]">
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="number" id="destination_lat" step="any" placeholder="Latitud Destino" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-[10px]">
-                            <input type="number" id="destination_lng" step="any" placeholder="Longitud Destino" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-[10px]">
+                        <div class="space-y-3">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-emerald-500 uppercase italic ml-1">Destino (Dropoff Address)</label>
+                                <input type="text" id="destination_address" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold italic outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="destination_lat" step="any" placeholder="Latitud Destino" class="bg-slate-50 border rounded-lg px-3 py-1 text-[10px]">
+                                <input type="number" id="destination_lng" step="any" placeholder="Longitud Destino" class="bg-slate-50 border rounded-lg px-3 py-1 text-[10px]">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden lg:col-span-2">
-                    <div class="bg-admin-accent p-4 text-white text-[10px] font-black uppercase tracking-widest">3. Métricas y Cierre de Carrera</div>
+                    <div class="bg-admin-accent p-4 text-white text-[10px] font-black uppercase tracking-widest">4. Cierre y Liquidación de Carrera</div>
                     <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-                        
                         <div class="space-y-3">
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">Start Time Real</label>
-                                <input type="datetime-local" id="start_time_real" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold">
+                                <label class="text-[9px] font-black text-slate-400 uppercase">Inicio Real</label>
+                                <input type="datetime-local" id="start_time_real" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold outline-none">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">End Time Real</label>
-                                <input type="datetime-local" id="end_time_real" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">Espera (Wait Time Min)</label>
-                                <input type="number" id="wait_time_minutes" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold">
+                                <label class="text-[9px] font-black text-slate-400 uppercase">Fin Real</label>
+                                <input type="datetime-local" id="end_time_real" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold outline-none">
                             </div>
                         </div>
-
                         <div class="space-y-3">
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">KM Start</label>
-                                <input type="number" id="km_start" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold">
+                                <label class="text-[9px] font-black text-slate-400 uppercase">KM Inicial</label>
+                                <input type="number" id="km_start" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold outline-none">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">KM End</label>
-                                <input type="number" id="km_end" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">KM Total</label>
-                                <input type="number" id="km_total" step="0.01" class="w-full bg-slate-200 border-2 border-slate-300 rounded-xl px-4 py-2 font-black text-admin-accent">
+                                <label class="text-[9px] font-black text-slate-400 uppercase">KM Final</label>
+                                <input type="number" id="km_end" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-bold outline-none">
                             </div>
                         </div>
-
                         <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-black text-slate-400 uppercase">Holiday Flag</span>
-                                <input type="checkbox" id="is_holiday" class="w-4 h-4 accent-admin-accent">
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-black text-slate-400 uppercase">Night Shift Flag</span>
-                                <input type="checkbox" id="is_night_shift" class="w-4 h-4 accent-admin-accent">
-                            </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase">Extra Charges (€)</label>
-                                <input type="number" id="extra_charges" step="0.01" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 font-bold">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-600 uppercase italic">Total Amount Final (€)</label>
+                                <label class="text-[9px] font-black text-slate-600 uppercase italic">Importe Total (€)</label>
                                 <input type="number" id="total_amount" step="0.01" class="w-full bg-white border-2 border-admin-accent rounded-xl px-4 py-2 font-black text-lg text-admin-accent">
                             </div>
                             <div class="flex items-center gap-2 pt-2">
                                 <input type="checkbox" id="is_finished" class="w-4 h-4 accent-admin-success">
-                                <span class="text-[9px] font-black text-admin-success uppercase">Servicio Finalizado</span>
+                                <span class="text-[9px] font-black text-admin-success uppercase">Finalizar Carrera</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-2 pb-10">
-                    <button type="submit" id="btn-save" class="w-full bg-admin-dark text-white py-4 rounded-3xl font-black uppercase text-[11px] tracking-widest hover:bg-admin-accent transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> ACTUALIZAR REGISTRO DE CARRERA
+                    <button type="submit" id="btn-save" class="w-full bg-admin-dark text-white py-4 rounded-3xl font-black uppercase text-[11px] tracking-widest hover:bg-admin-accent transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> REGISTRAR DESPACHO DE CARRERA
                     </button>
                 </div>
             </form>

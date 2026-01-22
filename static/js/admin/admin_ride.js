@@ -1,160 +1,141 @@
 /**
- * @file admin_ride_crud.js
- * @description Gestión de carreras vinculando Bookings, Drivers y Vehicles con GPS y métricas.
+ * @file admin_ride.js
+ * @description Gestión del monitor de viajes activos y despacho.
  */
 
+let allRides = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("%c[RIDE-CRUD] Sincronizando modelo...", "color: #3b82f6; font-weight: bold;");
-
-    await Promise.all([
-        loadBookings(),
-        loadDrivers(),
-        loadVehicles()
-    ]);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const rideId = urlParams.get('id');
-
-    if (rideId) {
-        await setupEditMode(rideId);
-    }
-
-    document.getElementById('crud-form').addEventListener('submit', handleFormSubmit);
+    console.log("%c[RIDE-MONITOR] Sincronizando operaciones...", "color: #10b981; font-weight: bold;");
+    await loadRides();
 });
 
-// Carga de selectores (Igual que antes)
-async function loadBookings() {
-    const res = await fetch('/api/v1/bookings');
-    const data = await res.json();
-    const select = document.getElementById('booking_id');
-    select.innerHTML = '<option value="">-- Seleccionar Booking --</option>';
-    data.forEach(b => {
-        const opt = document.createElement('option');
-        opt.value = b.id || b.ID;
-        opt.textContent = `ID:${b.id || b.ID} - ${b.pickup_location.substring(0,20)}...`;
-        select.appendChild(opt);
-    });
-}
-
-async function loadDrivers() {
-    const res = await fetch('/api/v1/drivers');
-    const data = await res.json();
-    const select = document.getElementById('driver_id');
-    select.innerHTML = '<option value="">-- Conductor --</option>';
-    data.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.id || d.ID;
-        opt.textContent = d.full_name;
-        select.appendChild(opt);
-    });
-}
-
-async function loadVehicles() {
-    const res = await fetch('/api/v1/vehicles');
-    const data = await res.json();
-    const select = document.getElementById('vehicle_id');
-    select.innerHTML = '<option value="">-- Vehículo --</option>';
-    data.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v.id || v.ID;
-        opt.textContent = `${v.plate_number} (${v.make})`;
-        select.appendChild(opt);
-    });
-}
-
-async function setupEditMode(id) {
+async function loadRides() {
+    const tbody = document.getElementById('ride-table-body');
+    const rideCount = document.getElementById('ride-count');
+    
     try {
-        const res = await fetch(`/api/v1/rides/${id}`);
-        const r = await res.json();
+        const res = await fetch('/api/v1/rides');
+        if (!res.ok) throw new Error("Error en la red");
+        allRides = await res.json();
 
-        // 1. IDs
-        document.getElementById('rideId').value = r.id || r.ID;
-        document.getElementById('booking_id').value = r.booking_id;
-        document.getElementById('driver_id').value = r.driver_id;
-        document.getElementById('vehicle_id').value = r.vehicle_id;
-        document.getElementById('voucher_number').value = r.voucher_number || '';
-
-        // 2. Tiempos (Tratamiento de fechas para input datetime-local)
-        const formatDate = (dateStr) => dateStr ? dateStr.slice(0, 16) : '';
-        document.getElementById('start_time_real').value = formatDate(r.start_time_real);
-        document.getElementById('end_time_real').value = formatDate(r.end_time_real);
-        document.getElementById('wait_time_minutes').value = r.wait_time_minutes || 0;
-
-        // 3. Kilometraje y Dinero
-        document.getElementById('km_start').value = r.km_start || 0;
-        document.getElementById('km_end').value = r.km_end || 0;
-        document.getElementById('km_total').value = r.km_total || 0;
-        document.getElementById('is_holiday').checked = r.is_holiday;
-        document.getElementById('is_night_shift').checked = r.is_night_shift;
-        document.getElementById('extra_charges').value = r.extra_charges || 0;
-        document.getElementById('total_amount').value = r.total_amount || 0;
-        document.getElementById('is_finished').checked = r.is_finished;
-
-        // 4. GPS
-        document.getElementById('origin_address').value = r.origin_address || '';
-        document.getElementById('origin_lat').value = r.origin_lat || '';
-        document.getElementById('origin_lng').value = r.origin_lng || '';
-        document.getElementById('destination_address').value = r.destination_address || '';
-        document.getElementById('destination_lat').value = r.destination_lat || '';
-        document.getElementById('destination_lng').value = r.destination_lng || '';
-
-        document.getElementById('page-title').textContent = "Modificar Carrera Realizada";
-
-    } catch (e) { console.error(e); }
+        rideCount.textContent = `${allRides.length} SERVICIOS EN SISTEMA`;
+        renderTable(allRides);
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-500 font-black uppercase">Fallo al conectar con el servidor logístico</td></tr>`;
+    }
 }
 
-async function handleFormSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('rideId').value;
-
-    const payload = {
-        booking_id: parseInt(document.getElementById('booking_id').value),
-        driver_id: parseInt(document.getElementById('driver_id').value),
-        vehicle_id: parseInt(document.getElementById('vehicle_id').value),
-        voucher_number: document.getElementById('voucher_number').value.trim(),
-
-        // Fechas
-        start_time_real: document.getElementById('start_time_real').value ? new Date(document.getElementById('start_time_real').value).toISOString() : null,
-        end_time_real: document.getElementById('end_time_real').value ? new Date(document.getElementById('end_time_real').value).toISOString() : null,
-        wait_time_minutes: parseInt(document.getElementById('wait_time_minutes').value) || 0,
-
-        // Kms
-        km_start: parseFloat(document.getElementById('km_start').value) || 0,
-        km_end: parseFloat(document.getElementById('km_end').value) || 0,
-        km_total: parseFloat(document.getElementById('km_total').value) || 0,
-
-        // Flags y Dinero
-        is_holiday: document.getElementById('is_holiday').checked,
-        is_night_shift: document.getElementById('is_night_shift').checked,
-        extra_charges: parseFloat(document.getElementById('extra_charges').value) || 0,
-        total_amount: parseFloat(document.getElementById('total_amount').value) || 0,
-        is_finished: document.getElementById('is_finished').checked,
-
-        // GPS
-        origin_address: document.getElementById('origin_address').value.trim(),
-        origin_lat: parseFloat(document.getElementById('origin_lat').value) || 0,
-        origin_lng: parseFloat(document.getElementById('origin_lng').value) || 0,
-        destination_address: document.getElementById('destination_address').value.trim(),
-        destination_lat: parseFloat(document.getElementById('destination_lat').value) || 0,
-        destination_lng: parseFloat(document.getElementById('destination_lng').value) || 0
+function renderTable(data) {
+    const tbody = document.getElementById('ride-table-body');
+    
+    const statusClasses = {
+        'scheduled': 'bg-blue-50 text-blue-600 border-blue-100',
+        'in_progress': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+        'completed': 'bg-slate-100 text-slate-500 border-slate-200',
+        'cancelled': 'bg-red-50 text-red-600 border-red-100'
     };
 
-    const method = id ? 'PUT' : 'POST';
-    const url = id ? `/api/v1/rides/${id}` : '/api/v1/rides';
+    tbody.innerHTML = data.map(r => {
+        // Determinamos el estado basado en el campo is_finished si no existe status string
+        let status = r.status || (r.is_finished ? 'completed' : 'in_progress');
+        
+        return `
+        <tr class="hover:bg-slate-50 transition-all border-b border-slate-100 group">
+            <td class="px-6 py-4">
+                <div class="flex flex-col">
+                    <span class="font-black text-slate-800 uppercase text-[12px] tracking-tighter">
+                        ${r.voucher_number || '#S/REF'}
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[200px]">
+                        ${r.origin_address || 'Dirección no definida'}
+                    </span>
+                </div>
+            </td>
+            <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
+                        <i class="fa-solid fa-user-tie text-xs"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-black text-slate-700 text-[11px] uppercase italic">
+                            ${r.client_name || 'Pasajero General'}
+                        </span>
+                        <span class="text-[9px] text-admin-accent font-bold">
+                            Cond: ${r.driver_id ? 'Asignado' : 'PENDIENTE'}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 text-center">
+                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border ${statusClasses[status] || 'bg-slate-50'}">
+                    ${status.replace('_', ' ')}
+                </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+                <div class="flex justify-end gap-2">
+                    <button onclick="window.location.href='/admin/rides/manage?id=${r.id || r.ID}'" 
+                            class="w-8 h-8 flex items-center justify-center bg-white text-slate-400 rounded-xl hover:bg-admin-accent hover:text-white transition-all shadow-sm border border-slate-100">
+                        <i class="fa-solid fa-sliders text-[10px]"></i>
+                    </button>
+                    <button onclick="openDeleteModal(${r.id || r.ID}, '${r.voucher_number || r.id}')" 
+                            class="w-8 h-8 flex items-center justify-center bg-white text-red-300 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm border border-slate-100">
+                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function filterRides() {
+    const term = document.getElementById('rideSearch').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    
+    const filtered = allRides.filter(r => {
+        const matchesTerm = (r.voucher_number && r.voucher_number.toLowerCase().includes(term)) || 
+                          (r.client_name && r.client_name.toLowerCase().includes(term)) ||
+                          (r.origin_address && r.origin_address.toLowerCase().includes(term));
+        
+        const currentStatus = r.status || (r.is_finished ? 'completed' : 'in_progress');
+        const matchesStatus = status === "" || currentStatus === status;
+        
+        return matchesTerm && matchesStatus;
+    });
+    
+    renderTable(filtered);
+}
+
+// Lógica del Modal de Borrado
+function openDeleteModal(id, name) {
+    document.getElementById('delete-id').value = id;
+    document.getElementById('confirm-item-name').textContent = name;
+    document.getElementById('confirm-key').value = '';
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+}
+
+async function confirmFinalDelete() {
+    const id = document.getElementById('delete-id').value;
+    const key = document.getElementById('confirm-key').value;
+
+    if (key !== 'ELIMINAR') {
+        alert("Escriba la palabra correctamente");
+        return;
+    }
 
     try {
-        const res = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
+        const res = await fetch(`/api/v1/rides/${id}`, { method: 'DELETE' });
         if (res.ok) {
-            alert("Carrera guardada con éxito");
-            window.location.href = "/admin/rides";
-        } else {
-            const err = await res.json();
-            alert("Error: " + (err.error || "Fallo al guardar"));
+            closeDeleteModal();
+            await loadRides();
         }
-    } catch (e) { alert("Error de servidor"); }
+    } catch (e) { alert("Error al eliminar"); }
+}
+
+function exportData(format) {
+    alert(`Exportando monitor a ${format.toUpperCase()}...`);
 }

@@ -40,22 +40,23 @@
             <div>
                 <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Logística y Flota</h3>
                 <ul class="space-y-1">
-                    <li><a href="/admin/drivers" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all"><i class="fa-solid fa-id-card"></i> Conductores</a></li>
-                    <li><a href="/admin/vehicles" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all"><i class="fa-solid fa-car"></i> Vehículos</a></li>
-                    <li><a href="/admin/rides" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold shadow-lg transition-all"><i class="fa-solid fa-route"></i> Viajes (Rides)</a></li>
+                    <li><a href="/admin/drivers" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-id-card"></i> Conductores</a></li>
+                    <li><a href="/admin/vehicles" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-car"></i> Vehículos</a></li>
+                    <li><a href="/admin/rides" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-admin-accent text-white font-bold shadow-lg transition-all text-[11.5px]"><i class="fa-solid fa-route"></i> Viajes (Rides)</a></li>
                 </ul>
             </div>
             <div>
-                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Comercial</h3>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 px-2">Gestión Comercial</h3>
                 <ul class="space-y-1">
-                    <li><a href="/admin/bookings" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all"><i class="fa-solid fa-calendar-check"></i> Reservas</a></li>
-                    <li><a href="/admin/companies" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all"><i class="fa-solid fa-building"></i> Empresas</a></li>
+                    <li><a href="/admin/bookings" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-calendar-check"></i> Reservas</a></li>
+                    <li><a href="/admin/events" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-clock-rotate-left"></i> Historial Eventos</a></li>
+                    <li><a href="/admin/payments" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700 text-slate-300 transition-all text-[11.5px]"><i class="fa-solid fa-money-check-dollar"></i> Pagos</a></li>
                 </ul>
             </div>
         </nav>
-        <div class="p-4 bg-slate-900">
+        <div class="p-4 bg-slate-900 mt-auto">
             <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-red-500/20 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all text-xs">
-                <i class="fa-solid fa-power-off"></i> SALIR
+                <i class="fa-solid fa-power-off"></i> SALIR DEL PANEL
             </a>
         </div>
     </aside>
@@ -66,12 +67,13 @@
             <div class="flex gap-2 overflow-x-auto no-scrollbar">
                 <button onclick="window.location.href='/admin/rides'" class="bg-admin-accent text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg shadow-lg ring-1 ring-white">Control Rides</button>
                 <button onclick="window.location.href='/admin/bookings'" class="bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Pending Bookings</button>
-                <button onclick="window.location.href='/admin/payments'" class="bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Payments</button>
+                <button onclick="window.location.href='/admin/events'" class="bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-admin-accent hover:text-white transition-all whitespace-nowrap">Audit Log</button>
             </div>
 
             <div class="flex gap-2 shrink-0 ml-4">
-                <button onclick="exportData('pdf')" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-pdf text-xs"></i></button>
-                <button onclick="window.location.href='/admin'" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-black border-2 border-black hover:bg-black hover:text-white transition-all shadow-sm"><i class="fa-solid fa-arrow-left text-xs"></i></button>
+                <button onclick="exportData('pdf')" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Exportar PDF"><i class="fa-solid fa-file-pdf text-xs"></i></button>
+                <button onclick="exportData('excel')" class="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-600/20 text-emerald-500 hover:bg-emerald-600 hover:text-white transition-all shadow-sm" title="Exportar Excel"><i class="fa-solid fa-file-excel text-xs"></i></button>
+                <button onclick="window.location.href='/admin'" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-black border-2 border-black hover:bg-black hover:text-white transition-all shadow-sm" title="Volver al Panel"><i class="fa-solid fa-arrow-left text-xs"></i></button>
             </div>
         </header>
 
@@ -88,7 +90,7 @@
                         </div>
                         <div class="w-40">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Estado</label>
-                            <select id="statusFilter" onchange="filterRides()" class="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 text-xs font-bold focus:ring-2 focus:ring-admin-accent outline-none shadow-sm">
+                            <select id="statusFilter" onchange="filterRides()" class="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 text-xs font-bold focus:ring-2 focus:ring-admin-accent outline-none shadow-sm cursor-pointer">
                                 <option value="">Todos</option>
                                 <option value="scheduled">Programado</option>
                                 <option value="in_progress">En Curso</option>
@@ -104,16 +106,20 @@
 
                 <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
                     <div class="p-4 bg-slate-900 text-white flex justify-between items-center text-[10px] font-black uppercase italic tracking-widest">
-                        <span>Monitor de Servicios Activos</span>
-                        <span id="ride-count">Sincronizando...</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <span>Monitor de Servicios Activos</span>
+                        </div>
+                        <span id="ride-count">Calculando flota...</span>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                    <th class="px-6 py-4">Ref / Origen</th>
+                                    <th class="px-6 py-4">Ref / Ruta</th>
                                     <th class="px-6 py-4">Asignación Flota</th>
+                                    <th class="px-6 py-4 text-center">Carga (P/M)</th>
                                     <th class="px-6 py-4 text-center">Estado</th>
                                     <th class="px-6 py-4 text-right">Acciones</th>
                                 </tr>
@@ -129,13 +135,13 @@
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border-2 border-red-500 text-center">
-            <h3 class="text-red-600 font-black uppercase mb-2 text-sm">Eliminar Registro</h3>
-            <p class="text-[11px] text-slate-500 mb-6 leading-tight">¿Desea borrar permanentemente el viaje <span id="confirm-item-name" class="font-bold text-slate-800"></span>? Escriba 'ELIMINAR' para confirmar.</p>
+            <h3 class="text-red-600 font-black uppercase mb-2 text-sm italic">Eliminar Registro Logístico</h3>
+            <p class="text-[11px] text-slate-500 mb-6 leading-tight">¿Desea borrar permanentemente el viaje <span id="confirm-item-name" class="font-bold text-slate-800"></span>? Esta acción es irreversible.</p>
             <input type="hidden" id="delete-id">
-            <input type="text" id="confirm-key" placeholder="Escriba ELIMINAR" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-[10px] font-bold outline-none text-red-600 uppercase mb-4">
+            <input type="text" id="confirm-key" placeholder="Escriba ELIMINAR" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-[10px] font-bold outline-none text-red-600 uppercase mb-4 text-center">
             <div class="flex gap-2">
-                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl text-[10px] font-black uppercase">Cancelar</button>
-                <button onclick="confirmFinalDelete()" class="flex-1 bg-red-600 text-white py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">Borrar</button>
+                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-200">Cancelar</button>
+                <button onclick="confirmFinalDelete()" class="flex-1 bg-red-600 text-white py-2 rounded-xl text-[10px] font-black uppercase shadow-lg hover:bg-red-700">Confirmar</button>
             </div>
         </div>
     </div>
