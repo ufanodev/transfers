@@ -6,14 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// Ride representa la ejecución física y operativa de un transporte.
 type Ride struct {
 	ID        uint `gorm:"primaryKey;autoIncrement" json:"id"`
 	BookingID uint `gorm:"not null;index" json:"booking_id"`
-	DriverID  uint `gorm:"not null;index" json:"driver_id"`
-	VehicleID uint `gorm:"not null;index" json:"vehicle_id"`
 
-	// --- DATOS COPIADOS DEL BOOKING (Para histórico inmutable) ---
+	// CAMBIO: Usamos *uint para permitir NULL en la DB
+	DriverID  *uint `gorm:"index" json:"driver_id"`
+	VehicleID *uint `gorm:"index" json:"vehicle_id"`
+
+	// --- DATOS COPIADOS DEL BOOKING ---
 	ClientName   string `gorm:"type:varchar(100)" json:"client_name"`
 	ClientPhone  string `gorm:"type:varchar(20)" json:"client_phone"`
 	Pax          int    `gorm:"default:1" json:"pax"`
@@ -28,7 +29,7 @@ type Ride struct {
 	DestinationLat float64 `gorm:"type:decimal(10,8)" json:"destination_lat"`
 	DestinationLng float64 `gorm:"type:decimal(11,8)" json:"destination_lng"`
 
-	// --- MÉTRICAS OPERATIVAS (Tiempos y KM) ---
+	// --- MÉTRICAS OPERATIVAS ---
 	StartTimeReal   *time.Time `json:"start_time_real"`
 	EndTimeReal     *time.Time `json:"end_time_real"`
 	WaitTimeMinutes int        `json:"wait_time_minutes"`
@@ -37,7 +38,7 @@ type Ride struct {
 	KmTotal         float64    `gorm:"type:decimal(10,2)" json:"km_total"`
 
 	// --- ESTADO Y FINANZAS ---
-	Status        string  `gorm:"type:varchar(20);default:'scheduled'" json:"status"` // scheduled, in_progress, completed, cancelled
+	Status        string  `gorm:"type:varchar(20);default:'scheduled'" json:"status"`
 	IsHoliday     bool    `json:"is_holiday"`
 	IsNightShift  bool    `json:"is_night_shift"`
 	ExtraCharges  float64 `gorm:"type:decimal(10,2)" json:"extra_charges"`
@@ -45,18 +46,16 @@ type Ride struct {
 	VoucherNumber string  `gorm:"type:varchar(50)" json:"voucher_number"`
 	IsFinished    bool    `json:"is_finished"`
 
-	// --- AUDITORÍA ESTÁNDAR ---
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	// --- RELACIONES (Para Preload en Controladores) ---
+	// --- RELACIONES ---
 	Booking Booking `gorm:"foreignKey:BookingID" json:"booking,omitempty"`
 	Driver  Driver  `gorm:"foreignKey:DriverID" json:"driver,omitempty"`
 	Vehicle Vehicle `gorm:"foreignKey:VehicleID" json:"vehicle,omitempty"`
 }
 
-// TableName define el nombre de la tabla en plural
 func (Ride) TableName() string {
 	return "rides"
 }

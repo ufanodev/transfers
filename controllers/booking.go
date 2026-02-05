@@ -39,36 +39,25 @@ func (ctrl *BookingController) POST(c *gin.Context) {
 		return
 	}
 
-	// 1. LÓGICA DE TIEMPO: Construir scheduled_at
-	// Combina la fecha (ScheduledDate) y el string de hora (ScheduledTime)
 	timeStr := fmt.Sprintf("%s %s", item.ScheduledDate.Format("2006-01-02"), item.ScheduledTime)
 	if t, err := time.Parse("2006-01-02 15:04", timeStr); err == nil {
 		item.ScheduledAt = t
 	}
 
 	tx := ctrl.DB.Begin()
-
-	// 2. CREACIÓN DE LA RESERVA
 	if err := tx.Create(&item).Error; err != nil {
 		tx.Rollback()
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear reserva"})
 		return
 	}
 
-	// 3. DISPARAR EVENTO (Encadenamiento automático)
-	event := models.BookingEvent{
+	tx.Create(&models.BookingEvent{
 		BookingID:   item.ID,
 		EventType:   "created",
-		Description: fmt.Sprintf("Reserva creada para %s - Ruta: %s a %s", item.ClientName, item.OriginAddress, item.DestAddress),
+		Description: fmt.Sprintf("Reserva creada para %s", item.ClientName),
 		NewValue:    "pending",
-		CreatedBy:   "Admin System", // Aquí podrías obtener el usuario del JWT
-	}
-
-	if err := tx.Create(&event).Error; err != nil {
-		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al registrar evento de auditoría"})
-		return
-	}
+		CreatedBy:   "Admin System",
+	})
 
 	tx.Commit()
 	c.JSON(http.StatusCreated, item)
@@ -83,9 +72,7 @@ func (ctrl *BookingController) PUT(c *gin.Context) {
 		return
 	}
 
-	// Guardamos el estado anterior para la auditoría
 	oldStatus := item.Status
-
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -93,17 +80,53 @@ func (ctrl *BookingController) PUT(c *gin.Context) {
 
 	tx := ctrl.DB.Begin()
 
-	// Si el estado ha cambiado, disparamos un evento de cambio de estado
+	// --- TRASPASO AUTOMÁTICO A OPERATIVA (RIDE) ---
+	if oldStatus != "confirmed" && item.Status == "confirmed" {
+		var count int64
+		tx.Model(&models.Ride{}).Where("booking_id = ?", item.ID).Count(&count)
+
+		if count == 0 {
+			newRide := models.Ride{
+				BookingID:      item.ID,
+				ClientName:     item.ClientName,
+				ClientPhone:    item.ClientPhone,
+				PickupAddress:  item.OriginAddress,
+				DropoffAddress: item.DestAddress,
+				OriginLat:      item.OriginLat,
+				OriginLng:      item.OriginLng,
+				DestinationLat: item.DestLat,
+				DestinationLng: item.DestLng,
+				Pax:            item.Pax,
+				LuggageCount:   item.Maletas,
+				Animals:        item.Animal,
+				Status:         "scheduled",
+			}
+			// DriverID y VehicleID quedan como nil (NULL en DB)
+			if err := tx.Create(&newRide).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Fallo al crear Ride: " + err.Error()})
+				return
+			}
+
+			tx.Create(&models.BookingEvent{
+				BookingID:   item.ID,
+				EventType:   "transfer_to_ops",
+				Description: "Reserva confirmada. Enviada al monitor de viajes.",
+				NewValue:    "scheduled",
+				CreatedBy:   "Logistics System",
+			})
+		}
+	}
+
 	if oldStatus != item.Status {
-		event := models.BookingEvent{
+		tx.Create(&models.BookingEvent{
 			BookingID:   item.ID,
 			EventType:   "status_change",
-			Description: fmt.Sprintf("Estado actualizado manualmente de %s a %s", oldStatus, item.Status),
+			Description: fmt.Sprintf("Cambio de estado: %s -> %s", oldStatus, item.Status),
 			OldValue:    oldStatus,
 			NewValue:    item.Status,
 			CreatedBy:   "Admin Editor",
-		}
-		tx.Create(&event)
+		})
 	}
 
 	if err := tx.Save(&item).Error; err != nil {
@@ -118,22 +141,6 @@ func (ctrl *BookingController) PUT(c *gin.Context) {
 
 func (ctrl *BookingController) DELETE(c *gin.Context) {
 	id := c.Param("id")
-
-	// Antes de borrar, registramos la cancelación en eventos
-	var item models.Booking
-	if err := ctrl.DB.First(&item, id).Error; err == nil {
-		event := models.BookingEvent{
-			BookingID:   item.ID,
-			EventType:   "deleted",
-			Description: "La reserva ha sido eliminada del sistema (Soft Delete)",
-			CreatedBy:   "Admin Trash",
-		}
-		ctrl.DB.Create(&event)
-	}
-
-	if err := ctrl.DB.Delete(&models.Booking{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar"})
-		return
-	}
+	ctrl.DB.Delete(&models.Booking{}, id)
 	c.JSON(http.StatusOK, gin.H{"message": "Reserva eliminada"})
 }
