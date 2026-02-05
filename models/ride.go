@@ -6,28 +6,29 @@ import (
 	"gorm.io/gorm"
 )
 
+// Ride representa la ejecución física y operativa de un transporte.
 type Ride struct {
 	ID        uint `gorm:"primaryKey;autoIncrement" json:"id"`
 	BookingID uint `gorm:"not null;index" json:"booking_id"`
-	DriverID  uint `gorm:"not null" json:"driver_id"`
-	VehicleID uint `gorm:"not null" json:"vehicle_id"`
+	DriverID  uint `gorm:"not null;index" json:"driver_id"`
+	VehicleID uint `gorm:"not null;index" json:"vehicle_id"`
 
-	// Datos del Cliente y Carga (NUEVOS)
+	// --- DATOS COPIADOS DEL BOOKING (Para histórico inmutable) ---
 	ClientName   string `gorm:"type:varchar(100)" json:"client_name"`
 	ClientPhone  string `gorm:"type:varchar(20)" json:"client_phone"`
 	Pax          int    `gorm:"default:1" json:"pax"`
 	Animals      bool   `gorm:"default:false" json:"animals"`
 	LuggageCount int    `gorm:"default:0" json:"luggage_count"`
 
-	// Ruta y Geolocalización (NUEVOS)
+	// --- RUTA Y GEOLOCALIZACIÓN ---
 	PickupAddress  string  `gorm:"type:varchar(255)" json:"pickup_address"`
 	DropoffAddress string  `gorm:"type:varchar(255)" json:"dropoff_address"`
-	OriginLat      float64 `gorm:"type:decimal(9,6)" json:"origin_lat"`
-	OriginLng      float64 `gorm:"type:decimal(9,6)" json:"origin_lng"`
-	DestinationLat float64 `gorm:"type:decimal(9,6)" json:"destination_lat"`
-	DestinationLng float64 `gorm:"type:decimal(9,6)" json:"destination_lng"`
+	OriginLat      float64 `gorm:"type:decimal(10,8)" json:"origin_lat"`
+	OriginLng      float64 `gorm:"type:decimal(11,8)" json:"origin_lng"`
+	DestinationLat float64 `gorm:"type:decimal(10,8)" json:"destination_lat"`
+	DestinationLng float64 `gorm:"type:decimal(11,8)" json:"destination_lng"`
 
-	// Métricas Operativas
+	// --- MÉTRICAS OPERATIVAS (Tiempos y KM) ---
 	StartTimeReal   *time.Time `json:"start_time_real"`
 	EndTimeReal     *time.Time `json:"end_time_real"`
 	WaitTimeMinutes int        `json:"wait_time_minutes"`
@@ -35,7 +36,7 @@ type Ride struct {
 	KmEnd           float64    `gorm:"type:decimal(10,2)" json:"km_end"`
 	KmTotal         float64    `gorm:"type:decimal(10,2)" json:"km_total"`
 
-	// Estado y Finanzas
+	// --- ESTADO Y FINANZAS ---
 	Status        string  `gorm:"type:varchar(20);default:'scheduled'" json:"status"` // scheduled, in_progress, completed, cancelled
 	IsHoliday     bool    `json:"is_holiday"`
 	IsNightShift  bool    `json:"is_night_shift"`
@@ -44,12 +45,18 @@ type Ride struct {
 	VoucherNumber string  `gorm:"type:varchar(50)" json:"voucher_number"`
 	IsFinished    bool    `json:"is_finished"`
 
+	// --- AUDITORÍA ESTÁNDAR ---
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	// Relaciones
-	Booking Booking `gorm:"foreignKey:BookingID" json:"-"`
-	Driver  Driver  `gorm:"foreignKey:DriverID" json:"-"`
-	Vehicle Vehicle `gorm:"foreignKey:VehicleID" json:"-"`
+	// --- RELACIONES (Para Preload en Controladores) ---
+	Booking Booking `gorm:"foreignKey:BookingID" json:"booking,omitempty"`
+	Driver  Driver  `gorm:"foreignKey:DriverID" json:"driver,omitempty"`
+	Vehicle Vehicle `gorm:"foreignKey:VehicleID" json:"vehicle,omitempty"`
+}
+
+// TableName define el nombre de la tabla en plural
+func (Ride) TableName() string {
+	return "rides"
 }

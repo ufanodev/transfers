@@ -13,7 +13,7 @@ type RideController struct {
 	DB *gorm.DB
 }
 
-// GET /api/v1/rides
+// GET /api/v1/rides - Monitor de flota en tiempo real
 func (ctrl *RideController) GetAll(c *gin.Context) {
 	var items []models.Ride
 	if err := ctrl.DB.Preload("Driver").Preload("Vehicle").Preload("Booking").Order("id desc").Find(&items).Error; err != nil {
@@ -34,8 +34,7 @@ func (ctrl *RideController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
-// POST /api/v1/rides
-// Crea el despacho y registra el evento automáticamente
+// POST /api/v1/rides - PASO 3: Despacho y Asignación
 func (ctrl *RideController) POST(c *gin.Context) {
 	var item models.Ride
 	if err := c.ShouldBindJSON(&item); err != nil {
@@ -45,7 +44,7 @@ func (ctrl *RideController) POST(c *gin.Context) {
 
 	tx := ctrl.DB.Begin()
 
-	// 1. HERENCIA: Si los datos del cliente vienen vacíos, traerlos del Booking
+	// 1. HERENCIA INTELIGENTE: Si faltan datos, succionarlos del Booking
 	var booking models.Booking
 	if err := tx.First(&booking, item.BookingID).Error; err == nil {
 		if item.ClientName == "" {
@@ -68,18 +67,18 @@ func (ctrl *RideController) POST(c *gin.Context) {
 		}
 		item.Animals = booking.Animal
 
-		// Actualizar estado del Booking a 'dispatched'
+		// Actualizar el estado de la reserva original
 		tx.Model(&booking).Update("status", "dispatched")
 	}
 
-	// 2. Crear el Ride
+	// 2. CREAR EL RIDE (La ejecución)
 	if err := tx.Create(&item).Error; err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusConflict, gin.H{"error": "La reserva ya tiene un viaje asignado"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Esta reserva ya tiene un servicio asignado"})
 		return
 	}
 
-	// 3. AUDITORÍA: Registrar creación de Ride en BookingEvents
+	// 3. PASO 2: LOG AUTOMÁTICO
 	event := models.BookingEvent{
 		BookingID:   item.BookingID,
 		EventType:   "driver_assigned",
@@ -93,8 +92,7 @@ func (ctrl *RideController) POST(c *gin.Context) {
 	c.JSON(http.StatusCreated, item)
 }
 
-// PUT /api/v1/rides/:id
-// Actualiza métricas y registra eventos de cambio de estado (ej: Finalizado)
+// PUT /api/v1/rides/:id - PASO 4: Cierre y Disparo de Pago
 func (ctrl *RideController) PUT(c *gin.Context) {
 	var item models.Ride
 	id := c.Param("id")
@@ -104,39 +102,53 @@ func (ctrl *RideController) PUT(c *gin.Context) {
 		return
 	}
 
-	// Guardamos el estado anterior para comparar
-	oldStatus := item.IsFinished
+	oldFinished := item.IsFinished
 
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de actualización incorrectos"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos incorrectos"})
 		return
 	}
 
-	// Lógica de Kilometraje
+	// Cálculo de Kilometraje en caliente
 	if item.KmEnd > 0 && item.KmStart > 0 {
 		item.KmTotal = item.KmEnd - item.KmStart
 	}
 
 	tx := ctrl.DB.Begin()
 
-	// AUDITORÍA: Si se marca como finalizado, registrar en eventos
-	if item.IsFinished && !oldStatus {
+	// SI EL SERVICIO SE CIERRA AHORA (HITO 4)
+	if item.IsFinished && !oldFinished {
+		// A. Log de Auditoría
 		event := models.BookingEvent{
 			BookingID:   item.BookingID,
 			EventType:   "ride_completed",
-			Description: fmt.Sprintf("Carrera finalizada. Km Totales: %.2f", item.KmTotal),
+			Description: fmt.Sprintf("Servicio finalizado con %.2f KM totales.", item.KmTotal),
 			NewValue:    "completed",
-			CreatedBy:   "DRIVER_APP",
+			CreatedBy:   "SISTEMA_CIERRE",
 		}
 		tx.Create(&event)
 
-		// También actualizamos el Booking original a 'completed'
+		// B. Sincronizar estado del Booking
 		tx.Model(&models.Booking{}).Where("id = ?", item.BookingID).Update("status", "completed")
+
+		// C. DISPARAR PAGO (Generar registro de Payment)
+		payment := models.Payment{
+			BookingID: item.BookingID,
+			RideID:    &item.ID,
+			Amount:    item.TotalAmount,
+			Status:    "pending", // El pago queda pendiente de cobro real
+			Method:    "cash",    // Por defecto, se puede cambiar luego
+		}
+		if err := tx.Create(&payment).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al generar registro de pago"})
+			return
+		}
 	}
 
 	if err := tx.Save(&item).Error; err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar cambios"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fallo al sincronizar viaje"})
 		return
 	}
 
@@ -147,25 +159,21 @@ func (ctrl *RideController) PUT(c *gin.Context) {
 // DELETE /api/v1/rides/:id
 func (ctrl *RideController) DELETE(c *gin.Context) {
 	id := c.Param("id")
-
-	// Antes de borrar, recuperamos el Ride para saber el BookingID y registrar el evento
 	var item models.Ride
+
 	if err := ctrl.DB.First(&item, id).Error; err == nil {
+		// Log de cancelación
 		event := models.BookingEvent{
 			BookingID:   item.BookingID,
 			EventType:   "ride_cancelled",
-			Description: "Asignación de conductor eliminada. El booking vuelve a estar pendiente.",
-			CreatedBy:   "ADMIN_DESPACHO",
+			Description: "Asignación de viaje cancelada por administración.",
+			CreatedBy:   "ADMIN_OPERACIONES",
 		}
 		ctrl.DB.Create(&event)
-
-		// Devolvemos el Booking a estado 'confirmed' o 'pending'
+		// Restaurar estado del booking
 		ctrl.DB.Model(&models.Booking{}).Where("id = ?", item.BookingID).Update("status", "confirmed")
 	}
 
-	if err := ctrl.DB.Delete(&models.Ride{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar el registro"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Viaje eliminado correctamente"})
+	ctrl.DB.Delete(&models.Ride{}, id)
+	c.JSON(http.StatusOK, gin.H{"message": "Ride eliminado"})
 }
